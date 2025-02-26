@@ -6,7 +6,7 @@ function setup() {
   cnv.position(0, 0);
 
   // Set background to black
-  background(5);
+  background(0);
 
   // Set width of the lines
   strokeWeight(10);
@@ -18,6 +18,7 @@ function setup() {
   describe('A blank canvas where the user draws by dragging the mouse');
 }
 
+
 function mouseDragged() {
   
   // Set the color based on the mouse position, and draw a line
@@ -25,4 +26,9 @@ function mouseDragged() {
   let blueHue = map(mouseX, 0, width, 180, 240);
   stroke(blueHue, 90, 90);
   line(pmouseX, pmouseY, mouseX, mouseY);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  background(0);
 }
