@@ -1,11 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible HTML Page Example</title>
+    <meta name="description" content="An example of a simple, accessible, and semantic HTML5 structure with best practices.">
 </head>
 <body>
-	<h1>Hello</h1>
+    <header>
+        <h1>Welcome to Our Accessible Web Page</h1>
+        <nav aria-label="Main Navigation">
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="about" aria-labelledby="about-heading">
+            <h2 id="about-heading">About Us</h2>
+            <p>We are committed to building web experiences that are accessible to everyone. This page demonstrates a clean HTML structure that is semantic, readable, and user-friendly.</p>
+        </section>
+
+        <section id="services" aria-labelledby="services-heading">
+            <h2 id="services-heading">Our Services</h2>
+            <p>From web design to accessibility audits, our services ensure that your digital products are inclusive and usable by all people, including those using assistive technologies.</p>
+        </section>
+
+        <section id="contact" aria-labelledby="contact-heading">
+            <h2 id="contact-heading">Contact Us</h2>
+            <p>If you have any questions or need assistance, feel free to reach out to our support team. We're here to help you make your website accessible to everyone.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Accessible Web Co. All rights reserved.</p>
+    </footer>
 </body>
 </html>
