@@ -1,0 +1,39 @@
+.image-container {
+      position: relative;
+      width: 100%;
+      max-width: 400px; /* change this as needed */
+      overflow: hidden;
+    }
+
+    .image-container img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+      transform: scale(1.05);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-container:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay h2 {
+      color: #fff;
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 0;
+    }
