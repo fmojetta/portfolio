@@ -73,6 +73,81 @@ body{
   background:rgba(0,0,0,0.05);
 }
 
+/* Hamburger menu button */
+.menu-toggle{
+  display:none;
+  flex-direction:column;
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:0.5rem;
+  gap:0.35rem;
+}
+
+.menu-toggle span{
+  width:24px;
+  height:2px;
+  background:var(--accent);
+  transition:all 0.3s ease;
+  display:block;
+}
+
+.menu-toggle.active span:nth-child(1){
+  transform:rotate(45deg) translate(8px, 8px);
+}
+
+.menu-toggle.active span:nth-child(2){
+  opacity:0;
+}
+
+.menu-toggle.active span:nth-child(3){
+  transform:rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile responsive nav */
+@media (max-width: 600px){
+  .menu-toggle{
+    display:flex;
+  }
+
+  .site-nav{
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    background:var(--bg);
+    border-top:1px solid #e5e7eb;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.3s ease;
+  }
+
+  .site-nav.active{
+    max-height:200px;
+  }
+
+  .site-nav ul{
+    flex-direction:column;
+    gap:0;
+    padding:1rem;
+    margin:0;
+  }
+
+  .site-nav li{
+    padding:0.5rem 0;
+    border-bottom:1px solid #f0f0f0;
+  }
+
+  .site-nav li:last-child{
+    border-bottom:none;
+  }
+
+  .site-nav a{
+    display:block;
+    padding:0.5rem 0;
+  }
+}
+
 /* Grid of case studies */
 .case-grid{
   display:grid;
@@ -124,7 +199,6 @@ body{
   color:#ffffff;
   position:relative;
   z-index:2;
-  text-shadow:0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .case-excerpt{
@@ -136,7 +210,6 @@ body{
   opacity:0;
   transform:translateY(10px);
   transition:opacity 0.4s ease, transform 0.4s ease;
-  text-shadow:0 2px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.5);
   line-height:1.5;
 }
 
