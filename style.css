@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+
 .root,
 *{
   box-sizing: border-box;
@@ -18,7 +20,7 @@ html,body{
 }
 body{
   margin:0;
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-family: 'Open Sans', -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background:var(--bg);
   color:var(--accent);
   -webkit-font-smoothing:antialiased;
@@ -134,7 +136,7 @@ body{
   opacity:0;
   transform:translateY(10px);
   transition:opacity 0.4s ease, transform 0.4s ease;
-  text-shadow:0 1px 3px rgba(0, 0, 0, 0.3);
+  text-shadow:0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .case-study:hover .case-excerpt{
