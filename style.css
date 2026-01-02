@@ -1,39 +1,176 @@
+.root,
+*{
+  box-sizing: border-box;
+}
+
+:root{
+  --gap: 1.25rem;
+  --bg: #fafafa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #111827;
+  --radius: 10px;
+}
+
+/* Global layout helpers */
+html,body{
+  height:100%;
+}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background:var(--bg);
+  color:var(--accent);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.4;
+}
+
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 1rem;
+}
+
+/* Header */
+.site-header{
+  background:transparent;
+  padding:1rem 0;
+}
+.header-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--gap);
+}
+.site-title{
+  font-size:1.125rem;
+  margin:0;
+}
+.site-title a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:600;
+}
+
+.site-nav ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  gap:1rem;
+}
+.site-nav a{
+  color:var(--accent);
+  text-decoration:none;
+  padding:0.35rem 0.5rem;
+  border-radius:6px;
+  transition:background 0.15s ease, color 0.15s ease;
+}
+.site-nav a:hover{
+  background:rgba(0,0,0,0.05);
+}
+
+/* Grid of case studies */
+.case-grid{
+  display:grid;
+  gap:var(--gap);
+  margin-top:2rem;
+  grid-template-columns:repeat(3,1fr);
+}
+.case-study{
+  background:var(--card);
+  padding:1.25rem;
+  border-radius:var(--radius);
+  box-shadow:0 4px 14px rgba(16,24,40,0.04);
+  min-height:140px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.case-study h2{
+  margin:0 0 0.5rem 0;
+  font-size:1.1rem;
+}
+.case-excerpt{
+  margin:0;
+  color:var(--muted);
+  font-size:0.95rem;
+}
+
+/* About and contact sections (simple placeholders) */
+.about, .contact{
+  background:transparent;
+  margin-top:2rem;
+  padding-bottom:1.5rem;
+}
+
+.site-footer{
+  text-align:center;
+  padding:2rem 0;
+  color:var(--muted);
+}
+
+/* Responsive rules */
+@media (max-width: 900px){
+  .case-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media (max-width: 600px){
+  .header-inner{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .site-nav ul{
+    width:100%;
+    justify-content:flex-start;
+    gap:0.5rem;
+    margin-top:0.5rem;
+  }
+  .case-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+/* --- Existing image overlay rules preserved below --- */
 .image-container {
-      position: relative;
-      width: 100%;
-      max-width: 400px; /* change this as needed */
-      overflow: hidden;
-    }
+  position: relative;
+  width: 100%;
+  max-width: 400px; /* change this as needed */
+  overflow: hidden;
+}
 
-    .image-container img {
-      display: block;
-      width: 100%;
-      height: auto;
-      transition: transform 0.3s ease;
-    }
+.image-container img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.3s ease;
+}
 
-    .image-container:hover img {
-      transform: scale(1.05);
-    }
+.image-container:hover img {
+  transform: scale(1.05);
+}
 
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.6);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .image-container:hover .overlay {
-      opacity: 1;
-    }
+.image-container:hover .overlay {
+  opacity: 1;
+}
 
-    .overlay h2 {
-      color: #fff;
-      font-size: 1.5rem;
-      text-align: center;
-      margin: 0;
-    }
+.overlay h2 {
+  color: #fff;
+  font-size: 1.5rem;
+  text-align: center;
+  margin: 0;
+}

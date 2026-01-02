@@ -1,16 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabio Mojetta</title>
-    <meta name="description" content="A simple, accessible, and semantic HTML5 website">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <h1>fabiomojetta@gmail.com</h1>
-        
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>My Portfolio</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header class="site-header">
+            <div class="container header-inner">
+                <h1 class="site-title"><a href="index.html">Your Name</a></h1>
+                <nav class="site-nav" aria-label="Primary">
+                    <ul>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact Me</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section class="case-grid container" aria-label="Case studies">
+                <article class="case-study">
+                    <h2>Case Study One</h2>
+                    <p class="case-excerpt">Short description placeholder for the first case study. Replace with a summary of the project.</p>
+                </article>
+
+                <article class="case-study">
+                    <h2>Case Study Two</h2>
+                    <p class="case-excerpt">Short description placeholder for the second case study. Replace with a summary of the project.</p>
+                </article>
+
+                <article class="case-study">
+                    <h2>Case Study Three</h2>
+                    <p class="case-excerpt">Short description placeholder for the third case study. Replace with a summary of the project.</p>
+                </article>
+            </section>
+
+            <section id="about" class="container about">
+                <h3>About</h3>
+                <p>Brief about blurb placeholder. Tell visitors who you are and what you do.</p>
+            </section>
+
+            <section id="contact" class="container contact">
+                <h3>Contact Me</h3>
+                <p>Contact details or a short contact form placeholder.</p>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">© <span id="year"></span> Your Name</div>
+        </footer>
+
+        <script>
+            // Small script to set the current year
+            document.getElementById('year').textContent = new Date().getFullYear();
+        </script>
+    </body>
+</html>
     </header>
 
     <main>
