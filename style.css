@@ -79,23 +79,43 @@ body{
   grid-template-columns:repeat(3,1fr);
 }
 .case-study{
-  background:var(--card);
+  position:relative;
   padding:1.25rem;
   border-radius:var(--radius);
   box-shadow:0 4px 14px rgba(16,24,40,0.04);
-  min-height:140px;
+  min-height:280px;
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
+  overflow:hidden;
+  background-size:cover;
+  background-position:center;
+  filter:grayscale(100%);
+  transition:filter 0.4s ease;
+}
+.case-study:hover{
+  filter:grayscale(0%);
 }
 .case-study h2{
   margin:0 0 0.5rem 0;
   font-size:1.1rem;
+  color:var(--accent);
+  position:relative;
+  z-index:2;
 }
 .case-excerpt{
   margin:0;
   color:var(--muted);
   font-size:0.95rem;
+  position:relative;
+  z-index:2;
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity 0.4s ease, transform 0.4s ease;
+}
+.case-study:hover .case-excerpt{
+  opacity:1;
+  transform:translateY(0);
 }
 
 /* About and contact sections (simple placeholders) */
