@@ -136,7 +136,8 @@ body{
   opacity:0;
   transform:translateY(10px);
   transition:opacity 0.4s ease, transform 0.4s ease;
-  text-shadow:0 1px 3px rgba(0, 0, 0, 0.6);
+  text-shadow:0 2px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.5);
+  line-height:1.5;
 }
 
 .case-study:hover .case-excerpt{
