@@ -148,12 +148,32 @@ body{
   }
 }
 
+/* Hero section */
+.hero{
+  text-align:center;
+  padding:4rem 1rem;
+  margin-top:2rem;
+}
+
+.hero h1{
+  font-size:2.5rem;
+  margin:0 0 1rem 0;
+  font-weight:700;
+  color:var(--accent);
+}
+
+.hero p{
+  font-size:1.125rem;
+  color:var(--muted);
+  margin:0;
+}
+
 /* Grid of case studies */
 .case-grid{
   display:grid;
   gap:var(--gap);
   margin-top:2rem;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
 }
 
 .case-study-link{
