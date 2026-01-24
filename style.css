@@ -285,3 +285,278 @@ body{
   text-align: center;
   margin: 0;
 }
+
+/* Case Study Page Styles */
+.case-hero {
+  padding: 3rem 0;
+  background: var(--card);
+  margin-bottom: 3rem;
+}
+
+.case-hero-content h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--accent);
+}
+
+.case-subtitle {
+  font-size: 1.25rem;
+  color: var(--muted);
+  margin: 0 0 2rem 0;
+}
+
+.case-hero-image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.case-section {
+  padding: 3rem 0;
+  margin: 0;
+}
+
+.case-section-alt {
+  background: var(--card);
+}
+
+.case-section h2 {
+  font-size: 2rem;
+  margin: 0 0 2rem 0;
+  color: var(--accent);
+}
+
+.case-section h3 {
+  font-size: 1.25rem;
+  color: var(--accent);
+  margin: 0 0 1rem 0;
+}
+
+.case-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.case-overview p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--accent);
+}
+
+.case-stats {
+  display: grid;
+  gap: 2rem;
+}
+
+.stat-item {
+  background: var(--bg);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.case-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.case-list li {
+  padding: 0.75rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.case-list li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.case-image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.case-image-full {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  display: block;
+  margin-top: 2rem;
+}
+
+.process-timeline {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.process-step {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 2rem;
+}
+
+.process-step-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.3;
+}
+
+.process-step-content h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.process-step-content p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.case-text-content {
+  max-width: 100%;
+}
+
+.case-text-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--accent);
+  margin: 0 0 1.5rem 0;
+}
+
+.case-results {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.result-card {
+  background: var(--bg);
+  padding: 2rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.result-metric {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.result-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.result-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.case-learnings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.learning-item h3 {
+  margin: 0 0 1rem 0;
+}
+
+.learning-item p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.case-footer-nav {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.back-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.back-link:hover {
+  opacity: 0.7;
+}
+
+/* Responsive adjustments for case study */
+@media (max-width: 900px) {
+  .case-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .case-results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .case-learnings {
+    grid-template-columns: 1fr;
+  }
+
+  .process-step {
+    grid-template-columns: 60px 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .case-hero-content h1 {
+    font-size: 1.75rem;
+  }
+
+  .case-section {
+    padding: 2rem 0;
+  }
+
+  .case-results {
+    grid-template-columns: 1fr;
+  }
+
+  .case-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .process-step {
+    grid-template-columns: 50px 1fr;
+  }
+
+  .process-step-number {
+    font-size: 1.5rem;
+  }
+}
