@@ -12,11 +12,12 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; }
+    html { height: 100%; }
 
     body {
+      min-height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #f4ecd8;
+      background: #FDFDFF;
       color: #2b2b2b;
       overflow-x: hidden;
     }
@@ -24,11 +25,11 @@
     .hero {
       position: relative;
       width: 100%;
-      height: 100vh;
+      height: 80vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f4ecd8;   /* calm, warm cream — no gradient */
+      background: #FDFDFF;   /* calm, warm cream — no gradient */
     }
 
     #scene {
@@ -40,28 +41,157 @@
       cursor: crosshair;
     }
 
-    .hero__hint {
+    /* --------------------------------------------------------------- ctas */
+    .hero__actions {
       position: absolute;
-      bottom: 2.5rem;
+      bottom: 5rem;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 0.8rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(0, 0, 255, 0.55);
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      /* the canvas below still needs the cursor for the particle repel, so only
+         the buttons themselves capture pointer events, not this wrapper */
       pointer-events: none;
-      animation: pulse 2.8s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.35; }
-      50%      { opacity: 0.9; }
+
+    .btn {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6em;
+      padding: 0.85em 1.6em;
+      border-radius: 999px;
+      border: 2px solid #0000ff;
+      font-size: 1.5rem;
+      font-weight: 400;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+
+    .btn svg {
+      width: 1.15em;
+      height: 1.15em;
+      flex: 0 0 auto;
+    }
+
+    .btn--secondary {
+      background: #fff;
+      color: #0000ff;
+    }
+    .btn--secondary:hover {
+      background: #eaeaff;
+    }
+
+    .btn--primary {
+      background: #0000ff;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 255, .25);
+    }
+    .btn--primary:hover {
+      background: #0000cc;
+      border-color: #0000cc;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+    .btn:focus-visible {
+      outline: 3px solid rgba(0, 0, 255, .35);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn, .btn:hover, .btn:active { transition: none; transform: none; }
+    }
+
+    /* ------------------------------------------------------------- carousel */
+    .showcase {
+      --item-height: 340px;
+      --gap: 24px;
+      --radius: 32px;
+      padding: 5rem 0;
+      background: #FDFDFF;
+    }
+
+    .carousel {
+      width: 100%;
+      overflow: hidden;
+      cursor: grab;
+      /* keep the browser from hijacking horizontal drags */
+      touch-action: pan-y;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .carousel.is-dragging { cursor: grabbing; }
+
+    .carousel__track {
+      display: flex;
+      gap: var(--gap);
+      width: max-content;
+      will-change: transform;
+    }
+
+    .carousel__item {
+      height: var(--item-height);
+      flex: 0 0 auto;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #e8dfc9;
+      /*box-shadow: 0 18px 40px rgba(43, 43, 43, .18);*/
+    }
+
+    .carousel__item img,
+    .carousel__item video {
+      display: block;
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+      /* Safari needs this so the media respects the rounded clip */
+      border-radius: inherit;
+      pointer-events: none;
+      -webkit-user-drag: none;
+    }
+
+    @media (max-width: 640px) {
+      .showcase { --item-height: 220px; --gap: 16px; --radius: 22px; padding: 3rem 0; }
     }
   </style>
 </head>
 <body>
   <section class="hero">
     <canvas id="scene"></canvas>
-    <p class="hero__hint">Contact me on <a href="https://www.linkedin.com/in/fabiomojetta/">Linkedin</a> or at <a href="mailto:fabiomojetta@gmail.com">fabiomojetta@gmail.com</a></p>
+
+    <div class="hero__actions">
+      <a class="btn btn--secondary" href="cv.pdf" download="Fabio-Mojetta-CV.pdf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12" />
+          <path d="M7 10l5 5 5-5" />
+          <path d="M4 21h16" />
+        </svg>
+        Download CV
+      </a>
+
+      <a class="btn btn--primary" href="mailto:fabiomjetta@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2.5" y="5" width="19" height="14" rx="2" />
+          <path d="M3 7l9 6 9-6" />
+        </svg>
+        Contact me!
+      </a>
+    </div>
+  </section>
+
+  <section class="showcase">
+    <div class="carousel" id="carousel">
+      <div class="carousel__track" id="carouselTrack"></div>
+    </div>
   </section>
 
   <script>
@@ -70,7 +200,7 @@
 
     // ---------------------------------------------------------------- config
     var CONFIG = {
-      texts: ['Hi, I am Fabio', 'currently building this portfolio'],
+      texts: ['Hi, I am Fabio', 'making this portfolio rn'],
       cycleMs: 7000,             // time each sentence stays before it explodes
       explodeSpeed: 10,           // burst velocity -> bigger explosion area
       scatterHold: 25,            // frames the spring stays OFF after a blast
@@ -86,7 +216,7 @@
       //   null            -> auto-fit to the viewport
       //   a number        -> fixed CSS px
       //   { min, vw, max } -> responsive: clamp(min, vw% of viewport width, max)
-      fontSize: { min: 30, vw: 8, max: 170 },
+      fontSize: null,
 
       gap: 3,                      // px between sampled points -> LOWER = more particles
       gapRefSize: 120,            // font size (CSS px) at which `gap` applies as written;
@@ -429,6 +559,193 @@
     } else {
       window.addEventListener('load', boot);
     }
+  })();
+  </script>
+
+  <script>
+  // ------------------------------------------------------- infinite carousel
+  (function () {
+    'use strict';
+
+    var carousel = document.getElementById('carousel');
+    var track = document.getElementById('carouselTrack');
+    var showcase = carousel.parentNode;
+
+    // Aspect ratios drive the width; every item keeps the same height.
+    var MEDIA = [
+      { type: 'video', src: 'video1.mp4', ratio: 3 / 2 },
+      { type: 'video', src: 'video3.mp4',  ratio: 1 },
+      { type: 'video', src: 'video2.mp4', ratio: 3 / 2 },
+      { type: 'image', src: 'image1.jpg',  ratio: 1 },
+      /*{ type: 'image', src: 'https://picsum.photos/id/1057/1200/800', ratio: 3 / 2 },
+      { type: 'image', src: 'https://picsum.photos/id/1069/900/1200', ratio: 3 / 4 },
+      { type: 'image', src: 'https://picsum.photos/id/1074/1600/900', ratio: 16 / 9 },
+      { type: 'image', src: 'https://picsum.photos/id/1080/800/800',  ratio: 1 }*/
+    ];
+
+    function itemHeight() {
+      return parseFloat(getComputedStyle(showcase).getPropertyValue('--item-height'));
+    }
+
+    function buildItem(media, h) {
+      var el = document.createElement('div');
+      el.className = 'carousel__item';
+      el.style.width = (h * media.ratio) + 'px';
+
+      if (media.type === 'video') {
+        var v = document.createElement('video');
+        v.src = media.src;
+        v.autoplay = true; v.loop = true; v.muted = true;
+        v.setAttribute('playsinline', '');
+        el.appendChild(v);
+      } else {
+        var img = document.createElement('img');
+        img.src = media.src;
+        img.alt = '';
+        img.draggable = false;
+        el.appendChild(img);
+      }
+      return el;
+    }
+
+    // Two copies of the set: translate by one set-width and wrap seamlessly.
+    var setWidth = 0;
+
+    function measure() {
+      var gap = parseFloat(getComputedStyle(track).gap) || 0;
+      var h = itemHeight();
+      setWidth = MEDIA.reduce(function (sum, m) { return sum + h * m.ratio + gap; }, 0);
+    }
+
+    function build() {
+      var h = itemHeight();
+      var frag = document.createDocumentFragment();
+      for (var pass = 0; pass < 2; pass++) {
+        for (var i = 0; i < MEDIA.length; i++) frag.appendChild(buildItem(MEDIA[i], h));
+      }
+      track.innerHTML = '';
+      track.appendChild(frag);
+      measure();
+    }
+
+    // ------------------------------------------------------------- motion
+    var BASE_SPEED  = 70;   // px/s, normal
+    var HOVER_SPEED = 25;   // px/s, while hovered
+    var EASE        = 6;    // how fast the speed eases toward its target
+    var FRICTION    = 4;    // how fast throw momentum decays
+
+    var offset = 0;         // current translateX (negative = moved forward)
+    var speed = BASE_SPEED;
+    var hovering = false;
+
+    var dragging = false;
+    var pointerId = null;
+    var dragStartX = 0, dragStartOffset = 0;
+    var lastMoveX = 0, lastMoveT = 0;
+    var throwVel = 0;       // px/s carried over after release
+
+    function wrap() {
+      if (setWidth <= 0) return;
+      while (offset <= -setWidth) offset += setWidth;
+      while (offset > 0) offset -= setWidth;
+    }
+
+    var lastT = performance.now();
+    function tick(now) {
+      var dt = Math.min((now - lastT) / 1000, 0.05);  // clamp after tab switches
+      lastT = now;
+
+      if (!dragging) {
+        var target = hovering ? HOVER_SPEED : BASE_SPEED;
+        speed += (target - speed) * Math.min(1, EASE * dt);
+
+        // leftover throw momentum bleeds off, then plain auto-scroll takes over
+        if (Math.abs(throwVel) > 1) {
+          offset += throwVel * dt;
+          throwVel -= throwVel * Math.min(1, FRICTION * dt);
+        } else {
+          throwVel = 0;
+        }
+        offset -= speed * dt;
+        wrap();
+      }
+
+      track.style.transform = 'translate3d(' + offset + 'px,0,0)';
+      requestAnimationFrame(tick);
+    }
+
+    // -------------------------------------------------------------- hover
+    carousel.addEventListener('pointerenter', function (e) {
+      if (e.pointerType === 'mouse') hovering = true;
+    });
+    carousel.addEventListener('pointerleave', function (e) {
+      if (e.pointerType === 'mouse') hovering = false;
+    });
+
+    // --------------------------------------------------------------- drag
+    carousel.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      dragging = true;
+      pointerId = e.pointerId;
+      carousel.setPointerCapture(pointerId);
+      carousel.classList.add('is-dragging');
+
+      dragStartX = lastMoveX = e.clientX;
+      dragStartOffset = offset;
+      lastMoveT = performance.now();
+      throwVel = 0;
+    });
+
+    carousel.addEventListener('pointermove', function (e) {
+      if (!dragging || e.pointerId !== pointerId) return;
+      e.preventDefault();
+
+      offset = dragStartOffset + (e.clientX - dragStartX);
+      wrap();
+
+      var now = performance.now();
+      var dt = (now - lastMoveT) / 1000;
+      if (dt > 0.001) {
+        throwVel = (e.clientX - lastMoveX) / dt;
+        lastMoveX = e.clientX;
+        lastMoveT = now;
+      }
+    });
+
+    function endDrag(e) {
+      if (!dragging || (e && e.pointerId !== pointerId)) return;
+      dragging = false;
+      carousel.classList.remove('is-dragging');
+      if (pointerId !== null && carousel.hasPointerCapture(pointerId)) {
+        carousel.releasePointerCapture(pointerId);
+      }
+      pointerId = null;
+
+      // stale flick (finger paused before release) shouldn't fling
+      if (performance.now() - lastMoveT > 120) throwVel = 0;
+      throwVel = Math.max(-2500, Math.min(2500, throwVel));
+    }
+
+    carousel.addEventListener('pointerup', endDrag);
+    carousel.addEventListener('pointercancel', endDrag);
+
+    // item widths derive from the CSS height variable, so they follow the breakpoint
+    var carouselResizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(carouselResizeTimer);
+      carouselResizeTimer = setTimeout(function () {
+        var h = itemHeight();
+        var kids = track.children;
+        for (var i = 0; i < kids.length; i++) {
+          kids[i].style.width = (h * MEDIA[i % MEDIA.length].ratio) + 'px';
+        }
+        measure();
+        wrap();
+      }, 150);
+    });
+
+    build();
+    requestAnimationFrame(tick);
   })();
   </script>
 </body>
