@@ -1,87 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
-<!doctype html>
-<html lang="en">
-    <head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Particle Text Hero</title>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZJH3J19LY2"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <!-- Elegant high-contrast serif -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet" />
 
-  gtag('config', 'G-ZJH3J19LY2');
-</script>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Fabio Mojetta</title>
-        <link rel="stylesheet" href="style.css" />
-    </head>
-    <body>
-        <header class="site-header">
-            <div class="container header-inner">
-                <h1 class="site-title"><a href="index.html">Fabio Mojetta</a></h1>
-                
-                <nav class="site-nav" aria-label="Primary" id="siteNav">
-                    <ul>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="mailto:fabiomojetta@gmail.com">Contact Me</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        <main>
-            <section class="hero container" aria-label="Introduction">
-                <h1>Hi, I'm a Product Designer test</h1>
-                <p>Creating intuitive and beautiful digital experiences</p>
-            </section>
+    html, body { height: 100%; }
 
-            <section class="case-grid container" aria-label="Case studies">
-                <a href="case-study-one.html" class="case-study-link">
-                    <article class="case-study" style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop');">
-                        <h2>Case Study One</h2>
-                        <p class="case-excerpt">Short description placeholder for the first case study. Replace with a summary of the project.</p>
-                    </article>
-                </a>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #04060d;
+      color: #eaf6ff;
+      overflow-x: hidden;
+    }
 
-                <a href="case-study-two.html" class="case-study-link">
-                    <article class="case-study" style="background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=400&fit=crop');">
-                        <h2>Case Study Two</h2>
-                        <p class="case-excerpt">Short description placeholder for the second case study. Replace with a summary of the project.</p>
-                    </article>
-                </a>
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(1200px 600px at 50% 45%, rgba(0, 180, 255, 0.18), transparent 60%),
+        radial-gradient(800px 500px at 80% 85%, rgba(0, 120, 255, 0.10), transparent 60%),
+        #04060d;
+    }
 
-                <a href="case-study-three.html" class="case-study-link">
-                    <article class="case-study" style="background-image: url('https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&h=400&fit=crop');">
-                        <h2>Case Study Three</h2>
-                        <p class="case-excerpt">Short description placeholder for the third case study. Replace with a summary of the project.</p>
-                    </article>
-                </a>
-            </section>
+    /* The canvas is sized to the TEXT (not full-bleed) so the library's fixed
+       150x150 sampling grid concentrates on the letters => far denser particles. */
+    #particle-canvas {
+      display: block;
+      width: min(92vw, 900px);
+      height: min(45vh, 380px);
+      cursor: crosshair;
+      /* neon-blue glow */
+      filter: drop-shadow(0 0 7px rgba(0, 180, 255, 0.6));
+    }
 
-        </main>
+    .hero__hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(0, 180, 255, 0.55);
+      pointer-events: none;
+      animation: pulse 2.8s ease-in-out infinite;
+    }
 
-        <footer class="site-footer">
-            <div class="container">© <span id="year"></span> Fabio Mojetta</div>
-        </footer>
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; }
+      50%      { opacity: 0.9; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <canvas id="particle-canvas" data-text="DESTROY"></canvas>
+    <p class="hero__hint">hover over the text</p>
+  </section>
 
-        <script>
-            // Small script to set the current year
-            document.getElementById('year').textContent = new Date().getFullYear();
+  <script src="https://cdn.jsdelivr.net/gh/aayusharyan/particleText.js@main/src/particleText.js"></script>
+  <script>
+    var SERIF = '"Playfair Display", Georgia, serif';
 
-        </script>
-    </body>
-</html>
-    </header>
+    // The library hardcodes "sans-serif" and exposes no fontFamily option.
+    // Patch the 2D context so any font string it assigns uses our serif family.
+    (function () {
+      var proto = CanvasRenderingContext2D.prototype;
+      var desc = Object.getOwnPropertyDescriptor(proto, 'font');
+      Object.defineProperty(proto, 'font', {
+        configurable: true,
+        get: function () { return desc.get.call(this); },
+        set: function (value) {
+          if (typeof value === 'string' && value.indexOf('sans-serif') !== -1) {
+            value = value.replace('sans-serif', SERIF);
+          }
+          desc.set.call(this, value);
+        }
+      });
+    })();
 
-    <main>
-        
-    </main>
+    function start() {
+      var canvas = document.getElementById('particle-canvas');
+      var word = canvas.dataset.text || 'TEXT';
 
-    <footer>
-        
-    </footer>
+      // Match the backing store to the displayed size (crisp) ...
+      var rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width);
+      canvas.height = Math.round(rect.height);
+
+      // ... then measure the real serif so the word fills the box in BOTH axes.
+      // Filling the box maximizes how many of the 150x150 grid cells land on the
+      // glyphs -> the maximum number of particles the library can produce.
+      var probe = document.createElement('canvas').getContext('2d');
+      probe.font = '900 100px ' + SERIF;
+      var wordWidthAt100 = probe.measureText(word).width;              // px per 100px font
+      var sizeToWidth  = (canvas.width  * 0.92) / (wordWidthAt100 / 100);
+      var sizeToHeight = canvas.height * 0.80;                          // caps ~ 0.7 of em
+      var fontSize = Math.floor(Math.min(sizeToWidth, sizeToHeight));
+
+      initParticleJS('#particle-canvas', {
+        colors: ['#00b4ff'],          // single bright electric blue
+        fontWeight: '900',
+        textAlign: 'center',
+        fontSize: fontSize,
+
+        // Very small particles -> fine-grained letters
+        particleRadius: {
+          xxxs: { base: 0.8, rand: 0.6 }, xxs: { base: 0.8, rand: 0.6 },
+          xs:   { base: 0.9, rand: 0.6 }, sm:  { base: 0.9, rand: 0.7 },
+          md:   { base: 1.0, rand: 0.7 }, lg:  { base: 1.0, rand: 0.7 },
+          xl:   { base: 1.1, rand: 0.7 }, xxl: { base: 1.1, rand: 0.8 },
+          xxxl: { base: 1.2, rand: 0.8 }
+        },
+
+        // Radius around the pointer where particles get blown away ("destroyed")
+        explosionRadius: {
+          xxxs: 40, xxs: 50, xs: 60, sm: 70, md: 80,
+          lg: 90, xl: 100, xxl: 110, xxxl: 120
+        },
+
+        friction: { base: 0.92, rand: 0.04 },
+        maxParticles: 40000,
+        autoAnimate: true
+      });
+    }
+
+    window.addEventListener('load', function () {
+      if (document.fonts && document.fonts.load) {
+        Promise.all([
+          document.fonts.load('900 200px "Playfair Display"'),
+          document.fonts.load('700 200px "Playfair Display"')
+        ]).then(function () {
+          // ensure it's actually usable before we rasterize
+          return document.fonts.ready;
+        }).then(start).catch(start);
+      } else {
+        start();
+      }
+    });
+  </script>
 </body>
 </html>
