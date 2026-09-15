@@ -1,0 +1,365 @@
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------- config
+  var CONFIG = {
+  texts: ['Hi, I am Fabio', 'making this portfolio rn'],
+  cycleMs: 7000,             // time each sentence stays before it explodes
+  explodeSpeed: 10,           // burst velocity -> bigger explosion area
+  scatterHold: 25,            // frames the spring stays OFF after a blast
+                              // (particles coast outward -> wider, looser scatter)
+  wander: 1.1,                // random drift added while a particle moves fast
+  wanderThreshold: 0.6,       // speed above which wander kicks in (organic paths)
+  idleAmp: 0,               // how far settled particles gently drift (px) -> "alive"
+  idleSpeed: 0.02,            // base speed of that idle drift
+  color: '#2E3A8C',            // indigo — matches --accent in styles.css
+  fontFamily: '"Instrument Serif", Georgia, serif',
+  fontWeight: 400,           // Instrument Serif ships a single weight (400)
+  // sentence size, works like CSS clamp():
+  //   null            -> auto-fit to the viewport
+  //   a number        -> fixed CSS px
+  //   { min, vw, max } -> responsive: clamp(min, vw% of viewport width, max)
+  fontSize: null,
+
+  gap: 3,                      // px between sampled points -> LOWER = more particles
+  gapRefSize: 120,            // font size (CSS px) at which `gap` applies as written;
+                              // smaller text samples proportionally denser so glyphs
+                              // stay legible instead of dissolving into loose dots
+  gapMin: 1.2,                // floor for the scaled gap (CSS px) -> caps the particle
+                              // count when the text gets very small
+  particleSize: 1.5,          // radius of each particle (px) at gapRefSize; scales
+                              // with the sampling density, like `gap`
+  particleSizeMin: 0.5,       // floor for the scaled radius (CSS px) -> keeps dots
+                              // visible instead of fading out on small screens
+  sizeVar: 0.2,               // per-particle radius spread (0.2 = +/-20%) -> subtle texture
+
+  mouseRadius: 120,           // how close the cursor "destroys" the text
+  repelForce: 2.6,            // strength of the push away from the cursor
+  swirl: 0.9,                 // tangential force -> chaotic swirling on impact
+  turbulence: 4.5,            // random jitter added on impact -> disruptive scatter
+  returnSpeed: 0.040,         // how fast particles spring back home (lower = looser)
+  friction: 0.8,             // velocity damping (higher = particles travel further)
+  glow: 0                   // shadow blur for the neon look
+  };
+
+  var canvas = document.getElementById('scene');
+  var ctx = canvas.getContext('2d');
+
+  // Offscreen buffer the text is rasterized into, then sampled pixel by pixel.
+  // Created once; willReadFrequently keeps the repeated getImageData reads on
+  // the CPU side instead of stalling on a GPU readback each time.
+  var off = document.createElement('canvas');
+  var octx = off.getContext('2d', { willReadFrequently: true });
+
+  var dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+
+  var particles = [];
+  var mouse = { x: -9999, y: -9999, active: false };
+  var W = 0, H = 0;
+  var currentText = 0;         // index into CONFIG.texts
+
+  // All the tuning numbers below are expressed "per frame at 60fps", which is how
+  // they were originally dialled in. `dtf` is the elapsed time of the current frame
+  // measured in those 60fps units (1.0 at 60fps, 0.5 at 120fps), and every force is
+  // scaled by it -- so the motion runs at the same wall-clock speed on a 60Hz panel,
+  // a 120Hz ProMotion display, and in a browser that vsyncs differently.
+  var FRAME_MS = 1000 / 60;
+  var DTF_MAX = 3;             // ignore frames longer than ~50ms (tab switches, GC
+                             // pauses) instead of teleporting every particle
+  var lastTime = 0;            // rAF timestamp of the previous frame
+  var booted = false;          // guards against boot() running twice
+  var clock = 0;               // accumulated time in 60fps frame units -> idle drift
+  var sizeScale = 1;           // dot radius multiplier, set by computeTargets to match
+                             // the sampling density (see gapRefSize)
+
+  // -------------------------------------------------------------- particle
+  function Particle(x, y) {
+  this.homeX = x;
+  this.homeY = y;
+  this.x = x + (Math.random() - 0.5) * 40 * dpr;  // start slightly scattered
+  this.y = y + (Math.random() - 0.5) * 40 * dpr;
+  this.vx = 0;
+  this.vy = 0;
+  this.hold = 0;                            // 60fps-frames of free flight (spring off)
+  this.fricPow = this.fricDtf = 0;          // memoised Math.pow(fric, dtf), see update
+  // per-particle physics -> no two particles move alike (organic feel)
+  this.ease = CONFIG.returnSpeed * (0.4 + Math.random() * 1.2);  // own spring rate
+  this.fric = CONFIG.friction * (0.97 + Math.random() * 0.04);   // own damping
+  this.spin = (Math.random() - 0.5) * 0.018;                     // curl on return
+  // per-particle idle drift -> each breathes on its own phase & rhythm
+  this.phaseX = Math.random() * Math.PI * 2;
+  this.phaseY = Math.random() * Math.PI * 2;
+  this.idleRate = CONFIG.idleSpeed * (0.6 + Math.random() * 0.8);
+  // per-particle radius multiplier -> the dot field gets a slight, stable grain
+  // instead of a uniform grid. Kept as a bare factor so the actual radius can be
+  // recomputed at draw time when the viewport (and so the sampling density) changes.
+  this.sizeJitter = 1 - CONFIG.sizeVar + Math.random() * CONFIG.sizeVar * 2;
+  }
+
+  Particle.prototype.update = function (dtf) {
+  // repel from the cursor
+  if (mouse.active) {
+    var dx = this.x - mouse.x;
+    var dy = this.y - mouse.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    // mouse coords live in device px, so the radius must be scaled too --
+    // otherwise the interaction shrinks on high-dpr screens
+    var radius = CONFIG.mouseRadius * dpr;
+    if (dist < radius && dist > 0.0001) {
+      var nx = dx / dist, ny = dy / dist;
+      // sharp near-field falloff -> a punchy explosive kick close to the cursor
+      var t = 1 - dist / radius;
+      var force = t * t * CONFIG.repelForce * radius * 0.12 * dtf;
+      // radial blast outward
+      this.vx += nx * force;
+      this.vy += ny * force;
+      // tangential swirl (perpendicular) -> chaotic, non-uniform motion
+      this.vx += -ny * force * CONFIG.swirl;
+      this.vy += nx * force * CONFIG.swirl;
+      // random turbulence -> disruptive, unpredictable scatter
+      this.vx += (Math.random() - 0.5) * CONFIG.turbulence * t * dpr * dtf;
+      this.vy += (Math.random() - 0.5) * CONFIG.turbulence * t * dpr * dtf;
+    }
+  }
+  if (this.hold > 0) {
+    // free-flight phase: no spring, so the blast expands wide and loose
+    this.hold -= dtf;
+  } else {
+    // gentle idle drift so the target is never perfectly still -> feels alive
+    var ox = Math.sin(clock * this.idleRate + this.phaseX) * CONFIG.idleAmp * dpr;
+    var oy = Math.cos(clock * this.idleRate + this.phaseY) * CONFIG.idleAmp * dpr;
+    // spring back toward the (softly drifting) home at this particle's own rate
+    var hx = (this.homeX + ox) - this.x;
+    var hy = (this.homeY + oy) - this.y;
+    this.vx += hx * this.ease * dtf;
+    this.vy += hy * this.ease * dtf;
+    // curl perpendicular to the home vector -> particles swirl into place
+    // instead of arriving in straight lines; fades out as they near home
+    this.vx += -hy * this.spin * dtf;
+    this.vy +=  hx * this.spin * dtf;
+  }
+
+  // speed-scaled random wander -> organic, wobbling paths while moving fast,
+  // but no shimmer once a particle has settled (slow) into the text
+  // speed is a per-60fps-frame quantity, so compare it against the raw velocity
+  // rather than the dt-scaled step
+  var speed = Math.abs(this.vx) + Math.abs(this.vy);
+  if (speed > CONFIG.wanderThreshold * dpr) {
+    this.vx += (Math.random() - 0.5) * CONFIG.wander * dpr * dtf;
+    this.vy += (Math.random() - 0.5) * CONFIG.wander * dpr * dtf;
+  }
+
+  // damping. Per-frame damping is exponential, so it has to be raised to dtf --
+  // scaling it linearly would make particles travel further at high refresh rates.
+  // Math.pow per particle per frame is wasteful when dtf barely moves, so memoise
+  // it and only recompute when the frame time actually changes.
+  if (dtf !== this.fricDtf) {
+    this.fricDtf = dtf;
+    this.fricPow = Math.pow(this.fric, dtf);
+  }
+  this.vx *= this.fricPow;
+  this.vy *= this.fricPow;
+  this.x += this.vx * dtf;
+  this.y += this.vy * dtf;
+  };
+
+  // ----------------------------------------- sample a sentence into home points
+  function computeTargets(text) {
+  // Reuse one offscreen canvas across cycles. Reallocating a viewport-sized
+  // canvas + ImageData every 7s churned tens of MB per cycle on big displays.
+  if (off.width !== W || off.height !== H) {
+    off.width = W;
+    off.height = H;
+  } else {
+    octx.clearRect(0, 0, W, H);
+  }
+
+  var fontSize;
+  if (CONFIG.fontSize && typeof CONFIG.fontSize === 'object') {
+    // responsive: clamp(min, vw% of viewport width, max), like CSS clamp()
+    var cssW = W / dpr;                                    // viewport width in CSS px
+    var preferred = cssW * (CONFIG.fontSize.vw / 100);
+    var cssSize = Math.max(CONFIG.fontSize.min, Math.min(preferred, CONFIG.fontSize.max));
+    fontSize = cssSize * dpr;
+  } else if (CONFIG.fontSize) {
+    // explicit size (CSS px), scaled to the canvas backing store
+    fontSize = CONFIG.fontSize * dpr;
+  } else {
+    // auto-fit the sentence to the viewport width and height
+    var probeSize = 100;
+    octx.font = CONFIG.fontWeight + ' ' + probeSize + 'px ' + CONFIG.fontFamily;
+    var wordWidthAt100 = octx.measureText(text).width;
+    var sizeToWidth = (W * 0.85) / (wordWidthAt100 / probeSize);
+    var sizeToHeight = H * 0.42;               // caps are ~0.7em; keeps it hero-sized
+    fontSize = Math.min(sizeToWidth, sizeToHeight);
+  }
+
+  octx.fillStyle = '#fff';
+  octx.textAlign = 'center';
+  octx.textBaseline = 'middle';
+  octx.font = CONFIG.fontWeight + ' ' + fontSize + 'px ' + CONFIG.fontFamily;
+  octx.fillText(text, W / 2, H / 2);
+
+  var image = octx.getImageData(0, 0, W, H).data;
+
+  // Sampling step scales with the font size, so the number of particles per
+  // glyph -- and therefore how legible a letter is -- stays constant across
+  // viewports. A fixed gap looks like fine grain at 170px and like a handful
+  // of unrelated dots at 30px, because coverage per glyph scales with size^2.
+  var scale = (fontSize / dpr) / CONFIG.gapRefSize;
+  var gap = Math.max(CONFIG.gapMin * dpr, CONFIG.gap * dpr * scale);
+  gap = Math.max(1, Math.round(gap));
+
+  // Tie the dot radius to the *actual* spacing rather than to `scale`, so the
+  // overlap ratio between neighbouring dots is identical at every viewport --
+  // this picks up the gapMin floor and the integer rounding above for free.
+  sizeScale = (gap / dpr) / CONFIG.gap;
+
+  var points = [];
+  for (var y = 0; y < H; y += gap) {
+    for (var x = 0; x < W; x += gap) {
+      if (image[(y * W + x) * 4 + 3] > 128) {
+        points.push({ x: x, y: y });
+      }
+    }
+  }
+  return points;
+  }
+
+  // Point the existing particle pool at a new sentence's home positions.
+  // Reconciles the pool size so no particle is orphaned or missing.
+  function setText(text) {
+  var targets = computeTargets(text);
+
+  if (particles.length < targets.length) {
+    while (particles.length < targets.length) {
+      var seed = targets[particles.length];
+      particles.push(new Particle(seed.x, seed.y));
+    }
+  } else if (particles.length > targets.length) {
+    particles.length = targets.length;   // drop the extras
+  }
+
+  for (var i = 0; i < particles.length; i++) {
+    particles[i].homeX = targets[i].x;
+    particles[i].homeY = targets[i].y;
+  }
+  }
+
+  // Blow every particle outward in a random direction -> the sentence shatters,
+  // then each particle springs toward its NEW home and the next sentence forms.
+  function explode() {
+  var cx = W / 2, cy = H / 2;
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
+
+    // direction: biased outward from the center, but with a wide random spread
+    // so it looks like a real, uneven blast rather than a tidy starburst
+    var dx = p.x - cx, dy = p.y - cy;
+    var base = Math.atan2(dy, dx);
+    if (!isFinite(base)) base = Math.random() * Math.PI * 2;
+    var ang = base + (Math.random() - 0.5) * 2.4;   // ±~1.2 rad of scatter
+
+    // heavy-tailed speed: most particles fly a bit, a few fly a LOT (organic)
+    var r = Math.random();
+    var spd = CONFIG.explodeSpeed * (0.35 + r * r * 2.6) * dpr;
+
+    p.vx = Math.cos(ang) * spd;
+    p.vy = Math.sin(ang) * spd;
+
+    // staggered free flight -> particles leave and return at different times.
+    // Counted in 60fps-frame units and decremented by dtf, so the coast lasts the
+    // same wall-clock time regardless of refresh rate.
+    p.hold = Math.random() * CONFIG.scatterHold;
+  }
+  }
+
+  // explode the current sentence, then recompose into the next one
+  function cycle() {
+  currentText = (currentText + 1) % CONFIG.texts.length;
+  setText(CONFIG.texts[currentText]);
+  explode();
+  }
+
+  // --------------------------------------------------------------- rendering
+  function render(now) {
+  // First frame has no previous timestamp to measure against, so assume 60fps.
+  // Long frames are clamped rather than integrated, otherwise returning to a
+  // backgrounded tab would apply one enormous step and fling the field apart.
+  var dtf = lastTime ? Math.min((now - lastTime) / FRAME_MS, DTF_MAX) : 1;
+  if (dtf <= 0) dtf = 1;      // guard against a non-monotonic clock
+  lastTime = now;
+  clock += dtf;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = CONFIG.color;
+  ctx.shadowColor = CONFIG.color;
+  ctx.shadowBlur = CONFIG.glow * dpr;
+
+  // One path for the whole field, one fill. Per-particle beginPath/fill was
+  // thousands of round trips per frame and dominated the frame budget.
+  // base radius in device px, scaled to the current sampling density; the
+  // per-particle jitter is applied on top of it
+  var baseR = Math.max(CONFIG.particleSizeMin, CONFIG.particleSize * sizeScale) * dpr;
+
+  ctx.beginPath();
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
+    p.update(dtf);
+    var r = p.sizeJitter * baseR;
+    // moveTo before each arc, otherwise consecutive arcs get joined by a line
+    ctx.moveTo(p.x + r, p.y);
+    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  requestAnimationFrame(render);
+  }
+
+  // ------------------------------------------------------------------- setup
+  function resize() {
+  var rect = canvas.getBoundingClientRect();
+  W = canvas.width = Math.round(rect.width * dpr);
+  H = canvas.height = Math.round(rect.height * dpr);
+  setText(CONFIG.texts[currentText]);   // rebuild for the current sentence, no explosion
+  }
+
+  function pointerMove(clientX, clientY) {
+  var rect = canvas.getBoundingClientRect();
+  mouse.x = (clientX - rect.left) * dpr;
+  mouse.y = (clientY - rect.top) * dpr;
+  mouse.active = true;
+  }
+
+  canvas.addEventListener('mousemove', function (e) { pointerMove(e.clientX, e.clientY); });
+  canvas.addEventListener('mouseleave', function () { mouse.active = false; });
+  canvas.addEventListener('touchmove', function (e) {
+  if (e.touches[0]) { pointerMove(e.touches[0].clientX, e.touches[0].clientY); }
+  }, { passive: true });
+  canvas.addEventListener('touchend', function () { mouse.active = false; });
+
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(resize, 150);
+  });
+
+  function boot() {
+  if (booted) return;                   // never start two render loops / two timers
+  booted = true;
+  resize();
+  // enter through rAF so the first frame gets a real timestamp
+  requestAnimationFrame(render);
+  setInterval(cycle, CONFIG.cycleMs);   // explode + swap sentence, looping
+  }
+
+  // Wait for the serif so the sampled glyphs are the real letterforms.
+  if (document.fonts && document.fonts.load) {
+  Promise.all([
+    document.fonts.load('400 200px "Instrument Serif"')
+  // then(boot, boot): as .then(boot).catch(boot) the catch would fire a SECOND boot
+  // if boot itself threw, leaving two render loops racing each other
+  ]).then(function () { return document.fonts.ready; }).then(boot, boot);
+  } else {
+  window.addEventListener('load', boot);
+  }
+})();
