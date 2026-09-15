@@ -3,16 +3,16 @@
 
   // ---------------------------------------------------------------- config
   var CONFIG = {
-  texts: ['Hi, I am Fabio', 'making this portfolio rn'],
+  texts: ["Hi, I'm Fabio", "I design things"],
   cycleMs: 7000,             // time each sentence stays before it explodes
-  explodeSpeed: 10,           // burst velocity -> bigger explosion area
-  scatterHold: 25,            // frames the spring stays OFF after a blast
+  explodeSpeed: 2,           // burst velocity -> bigger explosion area
+  scatterHold: 15,            // frames the spring stays OFF after a blast
                               // (particles coast outward -> wider, looser scatter)
   wander: 1.1,                // random drift added while a particle moves fast
   wanderThreshold: 0.6,       // speed above which wander kicks in (organic paths)
   idleAmp: 0,               // how far settled particles gently drift (px) -> "alive"
   idleSpeed: 0.02,            // base speed of that idle drift
-  color: '#2E3A8C',            // indigo — matches --accent in styles.css
+  color: '#0000ee',            // indigo — matches --accent in styles.css
   fontFamily: '"Instrument Serif", Georgia, serif',
   fontWeight: 400,           // Instrument Serif ships a single weight (400)
   // sentence size, works like CSS clamp():
@@ -22,22 +22,22 @@
   fontSize: null,
 
   gap: 3,                      // px between sampled points -> LOWER = more particles
-  gapRefSize: 120,            // font size (CSS px) at which `gap` applies as written;
+  gapRefSize: 100,            // font size (CSS px) at which `gap` applies as written;
                               // smaller text samples proportionally denser so glyphs
                               // stay legible instead of dissolving into loose dots
-  gapMin: 1.2,                // floor for the scaled gap (CSS px) -> caps the particle
+  gapMin: 1.5,                // floor for the scaled gap (CSS px) -> caps the particle
                               // count when the text gets very small
   particleSize: 1.5,          // radius of each particle (px) at gapRefSize; scales
                               // with the sampling density, like `gap`
   particleSizeMin: 0.5,       // floor for the scaled radius (CSS px) -> keeps dots
                               // visible instead of fading out on small screens
-  sizeVar: 0.2,               // per-particle radius spread (0.2 = +/-20%) -> subtle texture
+  sizeVar: 0,               // per-particle radius spread (0.2 = +/-20%) -> subtle texture
 
   mouseRadius: 120,           // how close the cursor "destroys" the text
   repelForce: 2.6,            // strength of the push away from the cursor
   swirl: 0.9,                 // tangential force -> chaotic swirling on impact
   turbulence: 4.5,            // random jitter added on impact -> disruptive scatter
-  returnSpeed: 0.040,         // how fast particles spring back home (lower = looser)
+  returnSpeed: 0.020,         // how fast particles spring back home (lower = looser)
   friction: 0.8,             // velocity damping (higher = particles travel further)
   glow: 0                   // shadow blur for the neon look
   };
@@ -262,7 +262,7 @@
 
     // heavy-tailed speed: most particles fly a bit, a few fly a LOT (organic)
     var r = Math.random();
-    var spd = CONFIG.explodeSpeed * (0.35 + r * r * 2.6) * dpr;
+    var spd = CONFIG.explodeSpeed * (0.35 + r * r * 1.5) * dpr;
 
     p.vx = Math.cos(ang) * spd;
     p.vy = Math.sin(ang) * spd;

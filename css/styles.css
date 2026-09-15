@@ -5,13 +5,13 @@
      One warm-paper base, one deep ink, one indigo accent. Every card
      colour below is a member of the same warm/desaturated family so the
      hero, carousel, cards and footer read as one system.               */
-  --paper:       #FAF6EF;   /* page background — warm cream           */
+  --paper:       #F2f2f2;   /* page background —           */
   --paper-2:     #EFE7D8;   /* recessed surfaces (carousel wells)     */
   --ink:         #241F1A;   /* primary text                           */
   --ink-soft:    #6E665C;   /* secondary text                         */
   --line:        rgba(36, 31, 26, .14);
 
-  --accent:      #2E3A8C;   /* indigo — the single accent hue          */
+  --accent:      #0000ee;   /* the single accent hue          */
   --accent-dark: #212B6B;
   --accent-tint: #E4E5F2;
   --on-accent:   #FAF6EF;
