@@ -1,0 +1,382 @@
+:root {
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* ---- palette -------------------------------------------------------
+     One warm-paper base, one deep ink, one indigo accent. Every card
+     colour below is a member of the same warm/desaturated family so the
+     hero, carousel, cards and footer read as one system.               */
+  --paper:       #FAF6EF;   /* page background — warm cream           */
+  --paper-2:     #EFE7D8;   /* recessed surfaces (carousel wells)     */
+  --ink:         #241F1A;   /* primary text                           */
+  --ink-soft:    #6E665C;   /* secondary text                         */
+  --line:        rgba(36, 31, 26, .14);
+
+  --accent:      #2E3A8C;   /* indigo — the single accent hue          */
+  --accent-dark: #212B6B;
+  --accent-tint: #E4E5F2;
+  --on-accent:   #FAF6EF;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { height: 100%; }
+
+body {
+  min-height: 100%;
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);   /* calm, warm cream — no gradient */
+}
+
+#scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+/* --------------------------------------------------------------- ctas */
+.hero__actions {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* the canvas below still needs the cursor for the particle repel, so only
+     the buttons themselves capture pointer events, not this wrapper */
+  pointer-events: none;
+}
+
+.btn {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.85em 1.6em;
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.btn svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex: 0 0 auto;
+}
+
+.btn--secondary {
+  background: var(--paper);
+  color: var(--accent);
+}
+.btn--secondary:hover {
+  background: var(--accent-tint);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 20px rgba(46, 58, 140, .25);
+}
+.btn--primary:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn:focus-visible {
+  outline: 3px solid rgba(46, 58, 140, .35);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn:hover, .btn:active { transition: none; transform: none; }
+}
+
+/* ------------------------------------------------------------- carousel */
+.showcase {
+  --item-height: 340px;
+  --gap: 24px;
+  --radius: 32px;
+  padding: 5rem 0;
+  background: var(--paper);
+}
+
+.carousel {
+  width: 100%;
+  overflow: hidden;
+  cursor: grab;
+  /* keep the browser from hijacking horizontal drags */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.carousel.is-dragging { cursor: grabbing; }
+
+.carousel__track {
+  display: flex;
+  gap: var(--gap);
+  width: max-content;
+  will-change: transform;
+}
+
+.carousel__item {
+  height: var(--item-height);
+  flex: 0 0 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper-2);
+  /*box-shadow: 0 18px 40px rgba(43, 43, 43, .18);*/
+}
+
+.carousel__item img,
+.carousel__item video {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  /* Safari needs this so the media respects the rounded clip */
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+@media (max-width: 640px) {
+  .showcase { --item-height: 220px; --gap: 16px; --radius: 22px; padding: 3rem 0; }
+}
+
+
+/* ------------------------------------------- plays: heading -------- */
+.plays__head {
+  max-width: 1280px;
+  margin: 0 auto 3.5rem;
+  text-align: center;
+}
+.plays__head h2 {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1.1;
+  color: var(--ink);
+}
+.plays__head p {
+  margin: 1.25rem auto 0;
+  max-width: 46ch;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+@media (max-width: 860px) {
+  .plays__head { margin-bottom: 2.25rem; }
+  .plays__head p { margin-left: 0; }
+}
+
+/* =============================================== play cards (bottom) ==
+   Width ratio: each card sets --span inline (out of --pc-cols; a row must
+   total --pc-cols). Height: --pc-card-h for all, or --h per card.       */
+.plays {
+  --pc-cols: 12;
+  --pc-card-h: 480px;
+  --pc-gap: 32px;
+  --pc-radius: 28px;
+  padding: 6rem 2rem;
+  background: var(--paper);
+}
+.plays__grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(var(--pc-cols), 1fr);
+  gap: var(--pc-gap);
+}
+
+.pc {
+  position: relative;
+  display: block;
+  grid-column: span var(--span, 6);
+  height: var(--h, var(--pc-card-h));
+  border-radius: var(--pc-radius);
+  background: var(--bg);
+  padding: 28px 28px 0;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease;
+}
+.pc:hover, .pc:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+}
+.pc:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+.pc__media {
+  height: 100%;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  transition: opacity .3s ease, transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.pc__media img,
+.pc__media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  pointer-events: none;
+}
+.pc:hover .pc__media,
+.pc:focus-visible .pc__media { opacity: 0; transform: scale(.97); }
+
+.pc__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 48px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity .3s ease;
+  pointer-events: none;
+}
+.pc:hover .pc__overlay,
+.pc:focus-visible .pc__overlay { opacity: 1; }
+
+.pc__overlay p {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 34px);
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  transform: translateY(10px);
+  transition: transform .4s cubic-bezier(.2,.7,.3,1);
+}
+.pc__btn {
+  font-family: var(--font-ui);
+  display: inline-block;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 16px 30px;
+  border-radius: 999px;
+  transform: translateY(14px);
+  transition: transform .4s cubic-bezier(.2,.7,.3,1) .04s;
+}
+.pc:hover .pc__overlay p,
+.pc:hover .pc__btn,
+.pc:focus-visible .pc__overlay p,
+.pc:focus-visible .pc__btn { transform: translateY(0); }
+
+/* mobile: no hover — media on top, copy always visible below */
+@media (hover: none), (max-width: 860px) {
+  .plays { padding: 4rem 1.25rem; }
+  .plays__grid { grid-template-columns: 1fr; gap: 24px; }
+  .pc {
+    grid-column: span 1 !important;
+    height: auto;
+    padding: 0;
+    transform: none;
+  }
+  .pc:hover, .pc:focus-visible { transform: none; box-shadow: none; }
+
+  .pc__media {
+    opacity: 1 !important;
+    transform: none !important;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--bg);
+    padding: 16px;
+  }
+  .pc__media img, .pc__media video {
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 14px;
+  }
+
+  .pc__overlay {
+    position: static;
+    opacity: 1 !important;
+    pointer-events: auto;
+    align-items: flex-start;
+    text-align: left;
+    gap: 22px;
+    padding: 28px 24px 32px;
+  }
+  .pc__overlay p { transform: none !important; font-size: 24px; }
+  .pc__btn { transform: none !important; }
+}
+
+/* -------------------------------------------------------- footer ---- */
+.footer {
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+.footer h2 {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--ink);
+}
+.footer__links {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.footer__link {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  transition: background .25s ease, color .25s ease, transform .25s ease;
+}
+.footer__link svg { width: 22px; height: 22px; }
+.footer__link:hover,
+.footer__link:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-2px);
+}
+.footer__note {
+  margin-top: 2.5rem;
+  font-family: var(--font-ui);
+  font-size: .85rem;
+  color: var(--ink-soft);
+}
