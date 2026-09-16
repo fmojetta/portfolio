@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RGE Studio export revamp — Case Study</title>
+
+  <link rel="icon" type="image/png" sizes="16x16" href="media/16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="media/32x32.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <nav class="project__nav">
+    <a class="project__back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5" />
+        <path d="M11 18l-6-6 6-6" />
+      </svg>
+      Back to home
+    </a>
+  </nav>
+
+  <main class="project">
+
+    <header class="project__header">
+      <h1>RGE Studio export revamp</h1>
+      <p class="project__meta">Product Designer · RGE Studio (Growens) · May 2025</p>
+    </header>
+
+    <section class="project__tldr">
+      <h2>TL;DR</h2>
+      <p>The export modal was the last screen users saw before sending their email — and it was confusing. Most people never discovered the native connectors that made exporting faster, so I redesigned the flow into a browsable, structured decision space that surfaces the best option first. After launch, connector-based exports rose 38% and HTML exports rose 15%.</p>
+    </section>
+
+    <section class="project__video">
+      <video src="media/video1.mp4" autoplay loop muted playsinline></video>
+    </section>
+
+    <section class="project__section">
+      <h2>The problem</h2>
+      <p>Export is a critical moment: it's both the final step of the workflow and a key upsell opportunity. But the modal was a flat, undifferentiated list that forced users to guess. 65% of eligible HubSpot users didn't even know native connectors existed, and switching between export methods meant restarting the whole flow. The rigid structure also made it hard to add new options, like HTML minification, without the UI becoming harder to parse.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Key insight</h2>
+      <p>Research showed users stick with the first export method they discover — it becomes a habit, and later change is rare. That made first impressions disproportionately important, and reframed the problem as one of visibility, not missing features.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>The solution</h2>
+      <p>I turned the modal into a browsable decision space instead of a single forced choice: users can scan every method before committing, and switching no longer resets their progress. Connected integrations now surface first, methods are grouped by intent (Integrations, HTML, Download), and the whole framework is modular enough to absorb future formats without a redesign. A built-in HTML minification toggle — benchmarked against tools like Figma and Canva — shipped alongside it, cutting file size by ~20%.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Impact</h2>
+      <div class="project__stats">
+        <div class="project__stat"><strong>+38%</strong><span>connector-based exports</span></div>
+        <div class="project__stat"><strong>+15%</strong><span>growth in HTML exports</span></div>
+        <div class="project__stat"><strong>13→18%</strong><span>share of users adopting connectors</span></div>
+        <div class="project__stat"><strong>70%</strong><span>faster task completion in testing</span></div>
+      </div>
+      <p>Beyond the numbers, support tickets about export confusion and undiscovered integrations dropped, and the new modular framework means future export formats can ship without another full redesign.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Reflections</h2>
+      <p>Users won't explore what they can't see — and once they land on a method, they rarely switch, which makes the first impression the whole game. Complexity isn't solved by adding more tooltips; it's solved by simplifying the core interaction. And designing for how users already think — in tools like Figma and Canva — made the new pattern feel familiar rather than foreign.</p>
+    </section>
+
+    <div class="project__footer-cta">
+      <a class="project__back" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5" />
+          <path d="M11 18l-6-6 6-6" />
+        </svg>
+        Back to home
+      </a>
+    </div>
+
+  </main>
+
+</body>
+</html>
