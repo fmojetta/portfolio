@@ -13,8 +13,8 @@
   idleAmp: 0,               // how far settled particles gently drift (px) -> "alive"
   idleSpeed: 0.02,            // base speed of that idle drift
   color: '#0000ee',            // indigo — matches --accent in styles.css
-  fontFamily: '"Instrument Serif", Georgia, serif',
-  fontWeight: 400,           // Instrument Serif ships a single weight (400)
+  fontFamily: '"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontWeight: 400,
   // sentence size, works like CSS clamp():
   //   null            -> auto-fit to the viewport
   //   a number        -> fixed CSS px
@@ -352,10 +352,10 @@
   setInterval(cycle, CONFIG.cycleMs);   // explode + swap sentence, looping
   }
 
-  // Wait for the serif so the sampled glyphs are the real letterforms.
+  // Wait for the font so the sampled glyphs are the real letterforms.
   if (document.fonts && document.fonts.load) {
   Promise.all([
-    document.fonts.load('400 200px "Instrument Serif"')
+    document.fonts.load('400 200px "Space Grotesk"')
   // then(boot, boot): as .then(boot).catch(boot) the catch would fire a SECOND boot
   // if boot itself threw, leaving two render loops racing each other
   ]).then(function () { return document.fonts.ready; }).then(boot, boot);

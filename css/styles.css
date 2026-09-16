@@ -1,5 +1,6 @@
 :root {
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* ---- palette -------------------------------------------------------
      One warm-paper base, one deep ink, one indigo accent. Every card
@@ -21,7 +22,7 @@ html { height: 100%; }
 
 body {
   min-height: 100%;
-  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   background: var(--paper);
   color: var(--ink);
   overflow-x: hidden;
@@ -176,9 +177,9 @@ body {
   text-align: center;
 }
 .plays__head h2 {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-size: clamp(3rem, 8vw, 5rem);
   line-height: 1.1;
   color: var(--ink);
 }
@@ -346,7 +347,7 @@ body {
   border-top: 1px solid var(--line);
 }
 .footer h2 {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(1.5rem, 3vw, 2rem);
   color: var(--ink);
@@ -376,7 +377,7 @@ body {
 }
 .footer__note {
   margin-top: 2.5rem;
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: .85rem;
   color: var(--ink-soft);
 }
@@ -386,7 +387,7 @@ body {
   padding: 2rem 2rem 0;
 }
 .project__back {
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   display: inline-flex;
   align-items: center;
   gap: .5em;
@@ -408,7 +409,7 @@ body {
 
 .project__header { margin-bottom: 2.5rem; }
 .project__header h1 {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.5rem, 6vw, 4rem);
   line-height: 1.05;
@@ -416,7 +417,7 @@ body {
 }
 .project__meta {
   margin-top: 1rem;
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: .95rem;
   color: var(--ink-soft);
 }
@@ -426,7 +427,8 @@ body {
   overflow: hidden;
   margin-bottom: 3rem;
 }
-.project__video video {
+.project__video video,
+.project__video img {
   display: block;
   width: 100%;
   height: min(46vh, 420px);
@@ -436,7 +438,8 @@ body {
 
 @media (max-width: 640px) {
   .project__video { border-radius: 18px; }
-  .project__video video { height: 42vh; }
+  .project__video video,
+  .project__video img { height: 42vh; }
 }
 
 .project__tldr {
@@ -446,7 +449,7 @@ body {
   margin-bottom: 3rem;
 }
 .project__tldr h2 {
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: .8rem;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -462,7 +465,7 @@ body {
 
 .project__section { margin-bottom: 3rem; }
 .project__section h2 {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   margin-bottom: 1rem;
@@ -482,13 +485,13 @@ body {
 }
 .project__stat strong {
   display: block;
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-size: 2.2rem;
   color: var(--accent);
   line-height: 1;
 }
 .project__stat span {
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: .85rem;
   color: var(--ink-soft);
 }
