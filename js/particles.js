@@ -189,7 +189,7 @@
     var probeSize = 100;
     octx.font = CONFIG.fontWeight + ' ' + probeSize + 'px ' + CONFIG.fontFamily;
     var wordWidthAt100 = octx.measureText(text).width;
-    var sizeToWidth = (W * 0.85) / (wordWidthAt100 / probeSize);
+    var sizeToWidth = (W * 0.65) / (wordWidthAt100 / probeSize);
     var sizeToHeight = H * 0.42;               // caps are ~0.7em; keeps it hero-sized
     fontSize = Math.min(sizeToWidth, sizeToHeight);
   }
