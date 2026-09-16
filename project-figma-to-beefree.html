@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figma2Beefree — Case Study</title>
+
+  <link rel="icon" type="image/png" sizes="16x16" href="media/16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="media/32x32.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <nav class="project__nav">
+    <a class="project__back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5" />
+        <path d="M11 18l-6-6 6-6" />
+      </svg>
+      Back to home
+    </a>
+  </nav>
+
+  <main class="project">
+
+    <header class="project__header">
+      <h1>Figma2Beefree</h1>
+      <p class="project__meta">Product Designer · Personal project · April–May 2026</p>
+    </header>
+
+    <section class="project__tldr">
+      <h2>TL;DR</h2>
+      <p>Designers mock up email templates in Figma, but there's no bridge from that canvas into Beefree — every layout gets rebuilt by hand, and small details drift in the handoff. I built a Figma plugin that lets you compose an email visually on the canvas — rows, columns, headings, buttons, images, dividers — using Figma's own native controls, then export it straight into Beefree's schema. A one-click path takes it further: convert, enrich, and import the finished template into a real Beefree account without ever leaving Figma.</p>
+    </section>
+
+    <section class="project__video">
+      <img src="media/Section 1.png" alt="Figma2Beefree plugin panel next to a template built on the Figma canvas" />
+    </section>
+
+    <section class="project__section">
+      <h2>The problem</h2>
+      <p>Beefree's email builder and Figma's canvas don't speak the same language. A designer can mock up a perfectly pixel-accurate template in Figma, but turning it into something Beefree can actually render means a developer manually re-creating every row, column, and module, translating fonts, paddings, and colors by hand. It's slow, and every manual step is a chance for the final template to drift from the design.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>What I built</h2>
+      <p>A Figma plugin with a module palette — Row, Heading, Paragraph, Button, Image, Divider, List, Menu, Icons — that inserts real Figma nodes onto the canvas, laid out on a 12-column grid so column widths never need manual resizing. Every node carries its Beefree-relevant properties (font, radius, padding, alignment) as plugin data, so editing stays entirely inside Figma's native property panel instead of a custom UI bolted on top. Selecting a template frame and exporting produces a valid Beefree Simple Schema JSON — structured rows and weighted columns that map 1:1 to what's on the canvas.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Closing the last gap</h2>
+      <p>Simple Schema isn't what Beefree's own editor opens — it needs a more enriched "Full" JSON, so a raw export still wasn't an importable template. I added an Optimize tab that re-enriches exported JSON with the Figma-only properties Beefree's own conversion step drops, and a One-click tab that chains the whole thing together: convert, enrich, log in, and import into the user's Beefree project in a single click. Since Beefree's conversion API won't accept requests from a Figma plugin's sandboxed iframe (it sends <code>Origin: null</code>, and the response has no CORS headers), I stood up a small Cloudflare Worker to proxy the request and pass through the credentials the user enters — session-only, nothing stored.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Where it stands</h2>
+      <div class="project__stats">
+        <div class="project__stat"><strong>8</strong><span>content module types supported</span></div>
+        <div class="project__stat"><strong>4</strong><span>tabs: Build, Export, Optimize, One-click</span></div>
+        <div class="project__stat"><strong>1 click</strong><span>from Figma canvas to a live Beefree import</span></div>
+        <div class="project__stat"><strong>12-col</strong><span>grid fidelity between canvas and schema</span></div>
+      </div>
+      <p>It's an unpublished, dev-mode plugin for now — anyone who wants to run it clones the repo and imports the manifest locally — but end to end it works: build a layout on the canvas, and one click later it's a live template in Beefree.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Reflections</h2>
+      <p>The best UI for this plugin was the one I didn't build — routing every property through Figma's native panel instead of a custom editor made the tool feel familiar from the first use. And schema fidelity turned out to be a chain: Simple Schema, Full Schema, Beefree's own conversion API, a CORS proxy — the "1:1 replication" promise only holds if every link holds, which is what pushed the project from a plugin into a small plugin-plus-service system.</p>
+    </section>
+
+    <div class="project__footer-cta">
+      <a class="project__back" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5" />
+          <path d="M11 18l-6-6 6-6" />
+        </svg>
+        Back to home
+      </a>
+    </div>
+
+  </main>
+
+</body>
+</html>
