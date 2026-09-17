@@ -12,7 +12,7 @@
   --ink-soft:    #6E665C;   /* secondary text                         */
   --line:        rgba(36, 31, 26, .14);
   --grid-line:   rgba(36, 31, 26, .08);
-  --grid-size:   120px;
+  --grid-size:   200px;
 
   --accent:      #0000ee;   /* the single accent hue          */
   --accent-dark: #0000AD;
@@ -52,7 +52,7 @@ body.page--home {
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
+  height: 90%;
   display: block;
   cursor: crosshair;
 }
@@ -231,7 +231,7 @@ body.page--home {
   height: var(--h, var(--pc-card-h));
   border-radius: var(--pc-radius);
   background: var(--bg);
-  padding: 28px 28px 0;
+  /*padding: 28px 28px 0;*/
   overflow: hidden;
   text-decoration: none;
   color: inherit;
@@ -257,7 +257,7 @@ body.page--home {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
+  object-position: center center;
   pointer-events: none;
 }
 .pc:hover .pc__media,
@@ -353,8 +353,8 @@ body.page--home {
 .footer {
   padding: 5rem 2rem 4rem;
   text-align: center;
-  background: transparent;
-  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, transparent, #f2f2f2 100%);
+  
 }
 .footer h2 {
   font-family: var(--font-display);

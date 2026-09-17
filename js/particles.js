@@ -19,7 +19,7 @@
   //   null            -> auto-fit to the viewport
   //   a number        -> fixed CSS px
   //   { min, vw, max } -> responsive: clamp(min, vw% of viewport width, max)
-  fontSize: null,
+  fontSize: { min: 50, vw: 10, max: 170 },
 
   gap: 3,                      // px between sampled points -> LOWER = more particles
   gapRefSize: 100,            // font size (CSS px) at which `gap` applies as written;
