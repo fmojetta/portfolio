@@ -11,6 +11,8 @@
   --ink:         #241F1A;   /* primary text                           */
   --ink-soft:    #6E665C;   /* secondary text                         */
   --line:        rgba(36, 31, 26, .14);
+  --grid-line:   rgba(36, 31, 26, .08);
+  --grid-size:   120px;
 
   --accent:      #0000ee;   /* the single accent hue          */
   --accent-dark: #0000AD;
@@ -28,6 +30,14 @@ body {
   overflow-x: hidden;
 }
 
+body.page--home {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
 .hero {
   position: relative;
   width: 100%;
@@ -35,7 +45,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper);   /* calm, warm cream — no gradient */
+  background: transparent;   /* let the page grid show through */
 }
 
 #scene {
@@ -122,7 +132,7 @@ body {
   --gap: 24px;
   --radius: 32px;
   padding: 5rem 0;
-  background: var(--paper);
+  background: transparent;
 }
 
 .carousel {
@@ -204,7 +214,7 @@ body {
   --pc-gap: 32px;
   --pc-radius: 28px;
   padding: 8rem 2rem;
-  background: var(--paper);
+  background: transparent;
 }
 .plays__grid {
   max-width: 1000px;
@@ -343,7 +353,7 @@ body {
 .footer {
   padding: 5rem 2rem 4rem;
   text-align: center;
-  background: var(--paper);
+  background: transparent;
   border-top: 1px solid var(--line);
 }
 .footer h2 {
@@ -494,6 +504,42 @@ body {
   font-family: var(--font-display);
   font-size: .85rem;
   color: var(--ink-soft);
+}
+
+.project__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin: 1.5rem 0;
+}
+.project__links a {
+  font-family: var(--font-display);
+  font-size: .95rem;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.project__links a:hover,
+.project__links a:focus-visible { border-bottom-color: var(--accent); }
+
+.project__section ul {
+  list-style: none;
+  display: grid;
+  gap: .6rem;
+  margin-top: .75rem;
+}
+.project__section ul li {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  padding-left: 1.2rem;
+  position: relative;
+}
+.project__section ul li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
 }
 
 .project__footer-cta {
