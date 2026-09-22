@@ -12,7 +12,7 @@
   --ink-soft:    #6E665C;   /* secondary text                         */
   --line:        rgba(36, 31, 26, .14);
   --grid-line:   rgba(36, 31, 26, .08);
-  --grid-size:   200px;
+  --grid-size:   10vw;
 
   --accent:      #0000ee;   /* the single accent hue          */
   --accent-dark: #0000AD;
