@@ -22,9 +22,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.m
 // Physics values are "per frame at 60fps" and in CSS px.
 const CONFIG = {
   // timing (ms)
-  stageMs: 3600,          // how long each low-fi stage is shown
-  settleMs: 1300,         // final stage: time for particles to land before going crisp
-  holdMs: 5500,           // final stage: how long the crisp text stays
+  settleMs: 1700,         // time for the particles to land before the real text takes over
+  holdMs: 4800,           // how long each sentence then stays as real text
+  holdLastMs: 6500,       // ... and the final one ("high-fidelity UI")
   rebreakMs: 1200,        // after a hover-break, wait this long before re-crisping
 
   // fidelity ramp: values at the first stage -> last stage
@@ -62,7 +62,7 @@ const CONFIG = {
 
   returnSpeed: 0.022,
   friction: 0.8,
-  fadeEase: 0.12,         // particle fade speed when handing over to crisp text
+  fadeEase: 0.045,        // particle fade speed during the hand-over (lower = softer, ~1s)
 
   maxPixelRatio: 1.5,
 };
@@ -191,7 +191,8 @@ function sample(text, fidelity) {
 
   const cRect = canvas.getBoundingClientRect();
   const sRect = crisp.getBoundingClientRect();
-  const cx = (sRect.left + sRect.width / 2) - cRect.left;   // slot centre, canvas px
+  const lRect = slot.getBoundingClientRect();
+  const cx = (lRect.left + lRect.width / 2) - cRect.left;   // slot centre, canvas px
 
   octx.font = font;
   const m = octx.measureText(text);
@@ -281,7 +282,7 @@ function explode(speed) {
 }
 
 // ------------------------------------------------------------ choreography
-const seq = { stage: 0, t: 0, crisp: false, brokeAt: -1e9 };
+const seq = { stage: 0, t: 0, crisp: false, snapped: false, brokeAt: -1e9 };
 
 function goStage(i, speed) {
   seq.stage = i;
@@ -293,25 +294,26 @@ function goStage(i, speed) {
 function setCrisp(on) {
   if (seq.crisp === on) return;
   seq.crisp = on;
+  // swap the word only while the real text is invisible, so it never flickers
+  if (on) crisp.textContent = STAGES[seq.stage];
+  seq.snapped = false;
   hero.classList.toggle('is-crisp', on);
 }
 
 function updateSequence(ms) {
   seq.t += ms;
-  if (seq.stage < LAST) {
-    if (seq.t > CONFIG.stageMs) goStage(seq.stage + 1, CONFIG.morphSpeed);
-    return;
-  }
-  const end = CONFIG.settleMs + CONFIG.holdMs;
+  // every sentence: particles land, hand over to the real text, hold, move on
+  const hold = seq.stage === LAST ? CONFIG.holdLastMs : CONFIG.holdMs;
+  const end = CONFIG.settleMs + hold;
   if (seq.t > end) {
     if (hoveringSlot) { seq.t = end - 400; return; }   // don't yank it away mid-play
     setCrisp(false);
-    goStage(0, CONFIG.blastSpeed);
+    const last = seq.stage === LAST;
+    goStage(last ? 0 : seq.stage + 1, last ? CONFIG.blastSpeed : CONFIG.morphSpeed);
     return;
   }
   if (!seq.crisp && seq.t > CONFIG.settleMs && !hoveringSlot &&
       seq.t - seq.brokeAt > CONFIG.rebreakMs) {
-    snapToHome();
     setCrisp(true);
   }
 }
@@ -382,7 +384,7 @@ function updateMouseLocal() {
 
 function updateTilt(dtf) {
   // flatten while the last stage lands, so the hand-over to HTML text is exact
-  const flat = seq.stage === LAST;
+  const flat = seq.t > CONFIG.settleMs * 0.4;   // level out before every hand-over
   const tx = !flat && mouse.active ? -mouse.ny * CONFIG.tiltX : 0;
   const ty = !flat && mouse.active ? mouse.nx * CONFIG.tiltY : 0;
   const k = 1 - Math.pow(1 - CONFIG.tiltEase, dtf);
@@ -516,7 +518,10 @@ function frame(now) {
   const target = seq.crisp ? 0 : 1;
   const u = material.uniforms.uOpacity;
   u.value += (target - u.value) * (1 - Math.pow(1 - CONFIG.fadeEase, dtf));
-  if (!seq.crisp) step(dtf);
+  // keep the particles moving while they fade out; once invisible, park them
+  // exactly on their targets so the next break starts from a clean copy
+  if (!seq.crisp || u.value > 0.02) step(dtf);
+  else if (!seq.snapped) { snapToHome(); seq.snapped = true; }
 
   renderer.render(scene, camera);
   adapt(ms);

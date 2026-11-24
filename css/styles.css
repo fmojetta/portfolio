@@ -78,9 +78,10 @@ body {
 .hero__crisp {
   color: var(--accent);
   white-space: nowrap;
-  transition: opacity .45s ease, filter .45s ease;
+  /* slow, soft cross-fade with the particles (which fade over ~1s) */
+  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1), filter 1.1s cubic-bezier(.4, 0, .2, 1);
 }
-.hero--3d .hero__crisp { opacity: 0; filter: blur(6px); }
+.hero--3d .hero__crisp { opacity: 0; filter: blur(1.5px); }
 .hero--3d.is-crisp .hero__crisp { opacity: 1; filter: none; }
 
 .hero__intro {
