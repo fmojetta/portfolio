@@ -50,8 +50,11 @@
     flowSpeed: 0.0007,      // how fast the current changes
 
     // pour: stage -> stage transition
-    pourMs: 1100,           // left-to-right sweep duration of the wave
-    pourJitter: 220,        // random extra delay per particle (ms)
+    pourMs: 800,            // left-to-right sweep duration of the wave
+    pourJitter: 200,        // random extra delay per particle (ms)
+    meltAmp: 3,             // while waiting for the wave, letters loosen up to
+                            // (1 + meltAmp) x the normal ripple ...
+    meltCreep: 0.18,        // ... and creep this far toward their new place
     pourLift: 2.2,          // upward kick at release -> particles arc over
 
     // stir: cursor
@@ -81,7 +84,7 @@
 
   // -------------------------------------------------------- particle state
   var capacity = 0, count = 0;
-  var px, py, vx, vy, hx, hy, ox, oy, hold, ease, lnFric, spin, sz;
+  var px, py, vx, vy, hx, hy, ox, oy, hold, hs, ease, lnFric, spin, sz;
 
   function grow(old, cap) {
     var a = new Float32Array(cap);
@@ -96,7 +99,7 @@
     vx = grow(vx, cap); vy = grow(vy, cap);
     hx = grow(hx, cap); hy = grow(hy, cap);
     ox = grow(ox, cap); oy = grow(oy, cap);
-    hold = grow(hold, cap);
+    hold = grow(hold, cap); hs = grow(hs, cap);
     ease = grow(ease, cap); lnFric = grow(lnFric, cap); spin = grow(spin, cap);
     sz = grow(sz, cap);
     for (var i = capacity; i < cap; i++) {   // no two particles move alike
@@ -118,7 +121,10 @@
   var octx = off.getContext('2d', { willReadFrequently: true });
 
   var W = 0, H = 0, dpr = 1;
-  var dotR = 1;   // current dot radius, CSS px
+  var dotR = 1;      // current dot radius, CSS px (eases toward dotTarget)
+  var dotTarget = 1;
+  var cache = [];    // pre-sampled stages, rebuilt on resize, so switching
+                     // sentences never stalls a frame on text rasterising
 
   function sample(text, fidelity) {
     var cs = getComputedStyle(crisp);
@@ -158,7 +164,7 @@
     var jitter = lerp(CONFIG.jitterRamp[0], CONFIG.jitterRamp[1], fidelity) * realGap;
 
     var baseR = Math.max(CONFIG.particleSizeMin, CONFIG.particleSize * (realGap / gapMul / CONFIG.gap));
-    dotR = baseR * lerp(CONFIG.sizeRamp[0], CONFIG.sizeRamp[1], fidelity);
+    var radius = baseR * lerp(CONFIG.sizeRamp[0], CONFIG.sizeRamp[1], fidelity);
 
     var out = [];
     for (var y = 0; y < h; y += step) {
@@ -169,11 +175,18 @@
         }
       }
     }
-    return out;
+    return { pts: out, r: radius };
+  }
+
+  function buildCache() {
+    cache = STAGES.map(function (text, i) {
+      return sample(text, LAST > 0 ? i / LAST : 1);
+    });
   }
 
   function setText(stage) {
-    var t = sample(STAGES[stage], LAST > 0 ? stage / LAST : 1);
+    var c = cache[stage], t = c.pts;
+    dotTarget = c.r;
     var n = t.length / 2;
     var prev = count;
     ensureCapacity(n);
@@ -211,7 +224,7 @@
     var span = Math.max(1, maxX - minX);
     for (i = 0; i < count; i++) {
       var ms = ((ox[i] - minX) / span) * CONFIG.pourMs + Math.random() * CONFIG.pourJitter;
-      hold[i] = ms / FRAME_MS;   // in 60fps-frame units
+      hold[i] = hs[i] = ms / FRAME_MS;   // in 60fps-frame units
     }
   }
 
@@ -292,9 +305,16 @@
       }
 
       // target: the old letter while waiting for the pour wave, else the new
+      // While waiting the letter "melts": its ripple grows and it starts to
+      // creep toward the new word, so nothing ever sits frozen.
       var waiting = hold[i] > 0;
-      var bx = waiting ? ox[i] : hx[i], by = waiting ? oy[i] : hy[i];
+      var bx = hx[i], by = hy[i], amp = A;
       if (waiting) {
+        var pr = 1 - hold[i] / hs[i];               // 0 -> 1 as the wave arrives
+        var creep = pr * pr * CONFIG.meltCreep;
+        bx = ox[i] + (hx[i] - ox[i]) * creep;
+        by = oy[i] + (hy[i] - oy[i]) * creep;
+        amp = A * (1 + pr * CONFIG.meltAmp);
         hold[i] -= dtf;
         if (hold[i] <= 0) {        // released: arc up and over to the new word
           uy -= CONFIG.pourLift * (0.6 + Math.random() * 0.8);
@@ -306,7 +326,7 @@
       // ripples as one surface rather than jittering dot by dot
       var fx = Math.sin(by * K + T) + 0.5 * Math.sin((bx + by) * K * 1.7 - T * 1.3);
       var fy = Math.cos(bx * K - T * 0.9) + 0.5 * Math.cos((bx - by) * K * 1.3 + T * 1.1);
-      var ex = bx + fx * A - x, ey = by + fy * A - y;
+      var ex = bx + fx * amp - x, ey = by + fy * amp - y;
       var e = ease[i] * dtf, s = spin[i] * dtf;
       ux += ex * e - ey * s;   // spring toward the drifting target, curling in
       uy += ey * e + ex * s;
@@ -343,6 +363,7 @@
     H = Math.max(1, canvas.clientHeight);
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
+    buildCache();
     setText(stage);
   }
 
@@ -356,6 +377,7 @@
     last = now;
     var dtf = Math.max(ms / FRAME_MS, 0.01);
     clockMs += ms;
+    dotR += (dotTarget - dotR) * (1 - Math.pow(0.94, dtf));   // sizes morph, never jump
     updateSequence(ms);
     step(dtf);
     draw();
@@ -393,6 +415,7 @@
   function boot() {
     hero.classList.add('hero--canvas');   // hides the static fallback text
     resize();
+    dotR = dotTarget;
     // the first sentence flies in from across the hero
     for (var i = 0; i < count; i++) {
       px[i] = Math.random() * W;
