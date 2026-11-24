@@ -11,8 +11,6 @@
   --ink:         #241F1A;   /* primary text                           */
   --ink-soft:    #6E665C;   /* secondary text                         */
   --line:        rgba(36, 31, 26, .14);
-  --grid-line:   rgba(36, 31, 26, .08);
-  --grid-size:   10vw;
 
   --accent:      #0000ee;   /* the single accent hue          */
   --accent-dark: #0000AD;
@@ -30,14 +28,6 @@ body {
   overflow-x: hidden;
 }
 
-body.page--home {
-  background-color: var(--paper);
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-
 .hero {
   position: relative;
   width: 100%;
@@ -45,7 +35,7 @@ body.page--home {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;   /* let the page grid show through */
+  background: transparent;
 }
 
 #scene {
