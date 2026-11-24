@@ -1,4 +1,4 @@
-// Hero: "I love making things [look right → work in code → think with AI]"
+// Hero: "I love making things [look right → work in code → ship faster with AI]"
 //
 // The headline is real, static HTML. Its last line (the "slot") is drawn by a
 // 2D canvas particle field that walks through the design process: each stage
