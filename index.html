@@ -27,7 +27,23 @@
 <body class="page--home">
 
   <section class="hero">
-    <canvas id="scene"></canvas>
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <div class="hero__content">
+      <p class="hero__eyebrow">Product Designer &middot; UI/UX &middot; Milan</p>
+
+      <h1 class="hero__title">
+        <span class="hero__line">Hi, I&rsquo;m Fabio.</span>
+        <span class="hero__line">I turn insights into</span>
+        <!-- particle stages, low to high fidelity; the last one resolves into this real text -->
+        <span class="hero__slot" id="heroSlot" data-stages="user flows|prototypes|high-fidelity UI"><span class="hero__crisp" id="heroCrisp">high-fidelity UI</span></span>
+      </h1>
+
+      <p class="hero__intro">
+        Product designer working across SaaS and fintech. Currently shaping the
+        embeddable email editor SDK and its AI features at Beefree; previously, a
+        commerce platform used in 8,000+ points of sale across Italy.
+      </p>
 
     <div class="hero__actions">
       <a class="btn btn--secondary" href="media/cv-mojetta.pdf" download="Fabio-Mojetta-CV.pdf">
@@ -48,6 +64,7 @@
         </svg>
         Contact me!
       </a>
+    </div>
     </div>
   </section>
 
@@ -131,17 +148,9 @@
     <p class="footer__note">© 2026 Fabio Mojetta</p>
   </footer>
 
-  <!-- 3D hero (Three.js). If WebGL2, ES modules or the CDN aren't available,
-       fall back to the original 2D canvas animation. -->
-  <script type="module">
-    import('./js/hero3d.js').catch(function (err) {
-      console.warn('3D hero unavailable, using 2D fallback:', err);
-      var s = document.createElement('script');
-      s.src = 'js/particles.js';
-      document.body.appendChild(s);
-    });
-  </script>
-  <script nomodule src="js/particles.js"></script>
+  <!-- 3D particle headline (Three.js). Without WebGL2/ES modules, or with
+       reduced motion, the static headline simply stays as is. -->
+  <script type="module" src="js/hero3d.js"></script>
   <script src="js/carousel.js"></script>
 </body>
 </html>

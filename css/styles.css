@@ -31,10 +31,11 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  height: 80vh;
+  min-height: 92vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 6rem 1.5rem 4rem;
   background: transparent;
 }
 
@@ -42,24 +43,70 @@ body {
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 90%;
+  height: 100%;
   display: block;
-  cursor: crosshair;
+}
+
+/* Text layer above the particles. It ignores the pointer (so the cursor keeps
+   playing with the particles underneath); only the buttons capture clicks. */
+.hero__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: 1100px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.hero__eyebrow {
+  font-family: var(--font-ui);
+  font-size: .95rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.75rem;
+  text-wrap: balance;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 8vw, 5.25rem);
+  line-height: 1.08;
+  color: var(--ink);
+}
+
+.hero__line,
+.hero__slot { display: block; }
+
+/* The slot is drawn by the particle canvas; the crisp text takes over once the
+   last stage has landed. Without JS/WebGL it is simply always visible. */
+.hero__crisp {
+  color: var(--accent);
+  white-space: nowrap;
+  transition: opacity .45s ease, filter .45s ease;
+}
+.hero--3d .hero__crisp { opacity: 0; filter: blur(6px); }
+.hero--3d.is-crisp .hero__crisp { opacity: 1; filter: none; }
+
+.hero__intro {
+  max-width: 54ch;
+  margin: 2rem auto 0;
+  font-family: var(--font-ui);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
 }
 
 /* --------------------------------------------------------------- ctas */
 .hero__actions {
-  position: absolute;
-  bottom: 5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: 2.5rem;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   justify-content: center;
-  /* the canvas below still needs the cursor for the particle repel, so only
-     the buttons themselves capture pointer events, not this wrapper */
-  pointer-events: none;
 }
 
 .btn {
