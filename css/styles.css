@@ -200,6 +200,12 @@ body {
   /*box-shadow: 0 18px 40px rgba(43, 43, 43, .18);*/
 }
 
+/* the WebGL renderer paints the items; the DOM track keeps layout, drag and
+   video playback but is invisible */
+.carousel--gl .carousel__track { opacity: 0; }
+.carousel--gl { -webkit-mask-image: none; mask-image: none; }   /* the shader fades the edges */
+.carousel--gl .carousel__item { transform: none !important; }
+
 .carousel__item img,
 .carousel__item video {
   display: block;

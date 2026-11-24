@@ -67,18 +67,20 @@
 
   // item centres inside the track (both copies) + the visible width, cached
   // so the sphere effect never reads layout during animation
-  var centers = [], viewW = 0;
+  var centers = [], widths = [], viewW = 0, itemH = 0;
 
   function measure() {
     var gap = parseFloat(getComputedStyle(track).gap) || 0;
     var h = itemHeight();
     setWidth = MEDIA.reduce(function (sum, m) { return sum + h * m.ratio + gap; }, 0);
+    itemH = h;
     centers = [];
     var x = 0;
     for (var pass = 0; pass < 2; pass++) {
       for (var i = 0; i < MEDIA.length; i++) {
         var w = h * MEDIA[i].ratio;
         centers.push(x + w / 2);
+        widths.push(w);
         x += w + gap;
       }
     }
@@ -172,7 +174,11 @@
     }
 
     track.style.transform = 'translate3d(' + offset + 'px,0,0)';
-    sphere();
+    if (curve) {
+      curve.render(offset, centers, widths, itemH, padTop, radius);
+    } else {
+      sphere();
+    }
     rafId = running ? requestAnimationFrame(tick) : 0;
   }
 
@@ -259,8 +265,26 @@
       }
       measure();
       wrap();
+      if (curve) { readBox(); curve.resize(); }
     }, 150);
   });
 
   build();
+
+  // Curved-wall WebGL renderer (js/carousel-curve.js). Without WebGL, or if
+  // the GPU drops the context, the CSS sphere above stays in charge.
+  var curve = null, padTop = 0, radius = 0;
+  function readBox() {
+    var cs = getComputedStyle(carousel);
+    padTop = parseFloat(cs.paddingTop) || 0;
+    radius = parseFloat(getComputedStyle(showcase).getPropertyValue('--radius')) || 0;
+  }
+  if (window.createCarouselCurve) {
+    try {
+      curve = window.createCarouselCurve(carousel, track, {
+        onLost: function () { curve = null; }
+      });
+    } catch (e) { curve = null; }
+    if (curve) readBox();
+  }
 })();
