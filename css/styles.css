@@ -159,13 +159,20 @@ body {
   --item-height: 340px;
   --gap: 24px;
   --radius: 32px;
-  padding: 3rem 0 5rem;
+  padding: 0 0 3rem;
+  /* pull up over the carousel's bulge room so it still peeks into view */
+  margin-top: calc(var(--item-height) * -.17);
   background: transparent;
 }
 
 .carousel {
   width: 100%;
   overflow: hidden;
+  /* room for edge items that bulge toward the viewer */
+  padding-block: calc(var(--item-height) * .2);
+  /* the sphere wall dissolves into the screen edges */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
   cursor: grab;
   /* keep the browser from hijacking horizontal drags */
   touch-action: pan-y;
@@ -184,6 +191,8 @@ body {
 
 .carousel__item {
   height: var(--item-height);
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
   flex: 0 0 auto;
   border-radius: var(--radius);
   overflow: hidden;

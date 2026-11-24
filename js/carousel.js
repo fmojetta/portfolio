@@ -65,10 +65,57 @@
   // Two copies of the set: translate by one set-width and wrap seamlessly.
   var setWidth = 0;
 
+  // item centres inside the track (both copies) + the visible width, cached
+  // so the sphere effect never reads layout during animation
+  var centers = [], viewW = 0;
+
   function measure() {
     var gap = parseFloat(getComputedStyle(track).gap) || 0;
     var h = itemHeight();
     setWidth = MEDIA.reduce(function (sum, m) { return sum + h * m.ratio + gap; }, 0);
+    centers = [];
+    var x = 0;
+    for (var pass = 0; pass < 2; pass++) {
+      for (var i = 0; i < MEDIA.length; i++) {
+        var w = h * MEDIA[i].ratio;
+        centers.push(x + w / 2);
+        x += w + gap;
+      }
+    }
+    viewW = carousel.clientWidth;
+  }
+
+  // ------------------------------------------------------- inside a sphere
+  // Each item is placed on the inner wall of a sphere around the viewer: the
+  // centre of the strip is farthest away, and towards the screen edges the
+  // wall curves in -- items swing to face you, come closer and stretch
+  // (barrel distortion), then dissolve into the edge mask.
+  var SPHERE = {
+    angle: 42,        // max rotateY (deg) at the screen edges
+    depth: 140,       // how far edge items come toward the viewer (px)
+    stretch: 0.22,    // extra height at the edges (barrel bulge)
+    squash: 0.06,     // slight horizontal squeeze at the edges
+    perspective: 900, // px
+  };
+
+  function sphere() {
+    if (!viewW) return;
+    var half = viewW / 2;
+    var mobile = viewW < 640;
+    var A = mobile ? SPHERE.angle * 0.7 : SPHERE.angle;
+    var D = mobile ? SPHERE.depth * 0.6 : SPHERE.depth;
+    var kids = track.children;
+    for (var i = 0; i < kids.length; i++) {
+      var u = (centers[i] + offset - half) / half;      // -1 left edge, +1 right edge
+      if (u < -1.6 || u > 1.6) continue;                 // off screen: leave as is
+      var a = Math.max(-1.4, Math.min(1.4, u));
+      var e = a * a;                                     // 0 centre -> 1 edges
+      kids[i].style.transform =
+        'perspective(' + SPHERE.perspective + 'px)' +
+        ' translateZ(' + (e * D).toFixed(1) + 'px)' +
+        ' rotateY(' + (-a * A).toFixed(2) + 'deg)' +
+        ' scale(' + (1 - e * SPHERE.squash).toFixed(3) + ',' + (1 + e * SPHERE.stretch).toFixed(3) + ')';
+    }
   }
 
   function build() {
@@ -125,6 +172,7 @@
     }
 
     track.style.transform = 'translate3d(' + offset + 'px,0,0)';
+    sphere();
     rafId = running ? requestAnimationFrame(tick) : 0;
   }
 
