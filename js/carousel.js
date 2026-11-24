@@ -8,9 +8,9 @@
 
   // Aspect ratios drive the width; every item keeps the same height.
   var MEDIA = [
-    { type: 'video', src: 'media/video1.mp4', ratio: 3 / 2 },
-    { type: 'video', src: 'media/video3.mp4',  ratio: 1 },
-    { type: 'video', src: 'media/video2.mp4', ratio: 3 / 2 },
+    { type: 'video', src: 'media/video1.mp4', poster: 'media/video1-poster.jpg', ratio: 3 / 2 },
+    { type: 'video', src: 'media/video3.mp4', poster: 'media/video3-poster.jpg', ratio: 1 },
+    { type: 'video', src: 'media/video2.mp4', poster: 'media/video2-poster.jpg', ratio: 3 / 2 },
     { type: 'image', src: 'media/image1-700.jpg',  ratio: 1 },
     /*{ type: 'image', src: 'https://picsum.photos/id/1057/1200/800', ratio: 3 / 2 },
     { type: 'image', src: 'https://picsum.photos/id/1069/900/1200', ratio: 3 / 4 },
@@ -23,17 +23,36 @@
   }
 
   // Play each video only while it is (nearly) on screen; pause it otherwise.
+  var visibleVideos = [];
+  function tryPlay(v) {
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});   // blocked: retried on first touch
+  }
   var videoObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
-      var v = e.target;
+      var v = e.target, i = visibleVideos.indexOf(v);
       if (e.isIntersecting) {
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {});
+        if (i < 0) visibleVideos.push(v);
+        tryPlay(v);
       } else {
+        if (i >= 0) visibleVideos.splice(i, 1);
         v.pause();
       }
     });
   }, { rootMargin: '200px 0px' });
+
+  // Some mobile browsers (iOS Low Power Mode, data saver) refuse to start
+  // videos until the visitor interacts with the page: retry on the first touch
+  // or scroll anywhere, not only on the carousel.
+  function unlock() {
+    visibleVideos.forEach(tryPlay);
+    ['touchstart', 'pointerdown', 'scroll', 'keydown'].forEach(function (t) {
+      window.removeEventListener(t, unlock, true);
+    });
+  }
+  ['touchstart', 'pointerdown', 'scroll', 'keydown'].forEach(function (t) {
+    window.addEventListener(t, unlock, { capture: true, passive: true });
+  });
 
   function buildItem(media, h) {
     var el = document.createElement('div');
@@ -44,9 +63,15 @@
       var v = document.createElement('video');
       // no autoplay: videos download and play only while near the viewport
       v.src = media.src;
+      if (media.poster) v.poster = media.poster;   // shown until it plays
       v.preload = 'none';
-      v.loop = true; v.muted = true;
+      v.loop = true;
+      // iOS checks the muted *attribute* when deciding whether a script may
+      // start a video without a tap; the property alone isn't enough
+      v.muted = true; v.defaultMuted = true;
+      v.setAttribute('muted', '');
       v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
       v.setAttribute('aria-hidden', 'true');
       videoObserver.observe(v);
       el.appendChild(v);
@@ -279,7 +304,11 @@
     padTop = parseFloat(cs.paddingTop) || 0;
     radius = parseFloat(getComputedStyle(showcase).getPropertyValue('--radius')) || 0;
   }
-  if (window.createCarouselCurve) {
+  // WebGL curve on desktop only. Phones and tablets get the CSS sphere with the
+  // real <video> elements visible: mobile Safari won't autoplay videos it
+  // considers hidden, and Firefox on Android hands WebGL black video frames.
+  var desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (desktop && window.createCarouselCurve) {
     try {
       curve = window.createCarouselCurve(carousel, track, {
         onLost: function () {
