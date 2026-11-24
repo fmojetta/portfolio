@@ -69,6 +69,9 @@
     driftAmp: [0.3, 1.6],   // range of each particle's own wandering radius (px)
     driftSpeed: [0.25, 0.9],// range of wandering speeds (radians per second)
     bigDots: 0.12,          // share of particles that are noticeably larger
+    doodleSize: 130,        // px; hand-drawn doodles beside the headline
+    doodleLine: 3.2,        // stroke width in the doodles' 100-unit box
+    doodleMinWidth: 900,    // hide doodles on narrower screens (no room)
     sizeVar: 0.45,          // per-particle size spread: most dots near the base
                             // size, a few noticeably bigger or smaller (0 = uniform)
 
@@ -229,12 +232,85 @@
         }
       }
     }
-    return { pts: out, r: radius };
+    return { pts: out, r: radius, gap: realGap };
+  }
+
+  // ------------------------------------------------------------- doodles
+  // Hand-drawn doodles around the headline, made of the same particles and
+  // swapped with each phrase (they pour along with the words). Paths are
+  // drawn in a 100x100 box, wobbly on purpose.
+  var DOODLES = {
+    eye: ['M6 52 C24 22 74 18 94 50 C76 80 26 82 6 52',
+          'M51 37 C60 37 64 44 63 51 C62 60 54 64 47 62 C40 60 37 53 39 46 C41 40 46 37 51 37'],
+    sparkle: ['M50 6 C52 34 60 44 94 50 C62 54 53 64 50 94 C47 64 38 55 6 50 C38 46 47 34 50 6'],
+    code: ['M34 24 L12 51 L35 76', 'M66 24 L89 50 L65 77', 'M57 16 L43 84'],
+    braces: ['M38 8 C22 10 33 44 16 50 C33 56 22 90 38 92',
+             'M62 8 C78 10 67 44 84 50 C67 56 78 90 62 92'],
+    rocket: ['M50 6 C69 24 71 54 62 72 L38 72 C29 54 31 24 50 6',
+             'M50 30 C55 30 57 34 57 37 C57 42 53 44 50 44 C46 44 43 41 43 37 C43 33 46 30 50 30',
+             'M38 58 L24 80 L39 75', 'M62 58 L76 80 L61 75',
+             'M44 78 C45 87 50 95 50 95 C50 95 55 87 56 78'],
+    sparkles: ['M38 10 C40 30 46 37 68 40 C46 44 40 51 38 72 C36 51 30 44 8 40 C30 37 36 30 38 10',
+               'M76 56 C77 67 80 71 92 72 C80 74 77 77 76 90 C75 77 72 74 60 72 C72 71 75 67 76 56'],
+  };
+  // [left doodle, right doodle] for each phrase, in order
+  var DOODLE_SETS = [['eye', 'sparkle'], ['code', 'braces'], ['rocket', 'sparkles']];
+
+  var doff = document.createElement('canvas');
+  var dctx = doff.getContext('2d', { willReadFrequently: true });
+
+  // rasterise one doodle (centre cx,cy; size px; tilt rad) and sample it
+  // with the same particle spacing as the text
+  function sampleDoodle(name, cx, cy, size, tilt, gap) {
+    var paths = DOODLES[name];
+    if (!paths || !window.Path2D) return [];
+    var pad = 8, box = Math.ceil((size + pad * 2) * SS);
+    doff.width = doff.height = box;
+    dctx.clearRect(0, 0, box, box);
+    dctx.save();
+    dctx.translate(box / 2, box / 2);
+    dctx.rotate(tilt);
+    dctx.scale(size * SS / 100, size * SS / 100);
+    dctx.translate(-50, -50);
+    dctx.lineWidth = CONFIG.doodleLine;
+    dctx.lineCap = dctx.lineJoin = 'round';
+    dctx.strokeStyle = '#fff';
+    for (var k = 0; k < paths.length; k++) dctx.stroke(new Path2D(paths[k]));
+    dctx.restore();
+    var data = dctx.getImageData(0, 0, box, box).data;
+    var step = Math.max(1, Math.round(gap * SS)), out = [];
+    var x0 = cx - box / SS / 2, y0 = cy - box / SS / 2;
+    for (var y = 0; y < box; y += step) {
+      for (var x = 0; x < box; x += step) {
+        if (data[(y * box + x) * 4 + 3] > 128) {
+          out.push(x0 + x / SS + (Math.random() - 0.5) * gap * 0.3,
+                   y0 + y / SS + (Math.random() - 0.5) * gap * 0.3);
+        }
+      }
+    }
+    return out;
+  }
+
+  // doodle positions: beside the headline, clear of the text, desktop only
+  function doodlePoints(i, gap) {
+    if (W < CONFIG.doodleMinWidth) return [];
+    var set = DOODLE_SETS[i % DOODLE_SETS.length];
+    var cRect = canvas.getBoundingClientRect();
+    var title = (crisp.closest('h1') || crisp).getBoundingClientRect();
+    var size = Math.min(CONFIG.doodleSize, (W - title.width) / 2 - 40);
+    if (size < 60) return [];
+    var midL = (title.left - cRect.left) / 2;          // centre of the left margin
+    var midR = (title.right - cRect.left) + (W - (title.right - cRect.left)) / 2;
+    var top = title.top - cRect.top, h = title.height;
+    return sampleDoodle(set[0], midL, top + h * 0.3, size, -0.14, gap)
+      .concat(sampleDoodle(set[1], midR, top + h * 0.72, size, 0.12, gap));
   }
 
   function buildCache() {
     cache = STAGES.map(function (text, i) {
-      return sample(text, CONFIG.fidelityRamp && LAST > 0 ? i / LAST : 1);
+      var c = sample(text, CONFIG.fidelityRamp && LAST > 0 ? i / LAST : 1);
+      c.pts = c.pts.concat(doodlePoints(i, c.gap));
+      return c;
     });
   }
 
