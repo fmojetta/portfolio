@@ -34,11 +34,11 @@ body {
 .hero {
   position: relative;
   width: 100%;
-  min-height: 92vh;
+  min-height: 78vh;   /* leaves the top of the carousel peeking in */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6rem 1.5rem 4rem;
+  padding: 4.5rem 1.5rem 2.5rem;
   background: transparent;
 }
 
@@ -159,7 +159,7 @@ body {
   --item-height: 340px;
   --gap: 24px;
   --radius: 32px;
-  padding: 5rem 0;
+  padding: 3rem 0 5rem;
   background: transparent;
 }
 
