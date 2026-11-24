@@ -11,7 +11,7 @@
     { type: 'video', src: 'media/video1.mp4', ratio: 3 / 2 },
     { type: 'video', src: 'media/video3.mp4',  ratio: 1 },
     { type: 'video', src: 'media/video2.mp4', ratio: 3 / 2 },
-    { type: 'image', src: 'media/image1.jpg',  ratio: 1 },
+    { type: 'image', src: 'media/image1-700.jpg',  ratio: 1 },
     /*{ type: 'image', src: 'https://picsum.photos/id/1057/1200/800', ratio: 3 / 2 },
     { type: 'image', src: 'https://picsum.photos/id/1069/900/1200', ratio: 3 / 4 },
     { type: 'image', src: 'https://picsum.photos/id/1074/1600/900', ratio: 16 / 9 },
@@ -22,6 +22,19 @@
     return parseFloat(getComputedStyle(showcase).getPropertyValue('--item-height'));
   }
 
+  // Play each video only while it is (nearly) on screen; pause it otherwise.
+  var videoObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var v = e.target;
+      if (e.isIntersecting) {
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+      } else {
+        v.pause();
+      }
+    });
+  }, { rootMargin: '200px 0px' });
+
   function buildItem(media, h) {
     var el = document.createElement('div');
     el.className = 'carousel__item';
@@ -29,14 +42,20 @@
 
     if (media.type === 'video') {
       var v = document.createElement('video');
+      // no autoplay: videos download and play only while near the viewport
       v.src = media.src;
-      v.autoplay = true; v.loop = true; v.muted = true;
+      v.preload = 'none';
+      v.loop = true; v.muted = true;
       v.setAttribute('playsinline', '');
+      v.setAttribute('aria-hidden', 'true');
+      videoObserver.observe(v);
       el.appendChild(v);
     } else {
       var img = document.createElement('img');
       img.src = media.src;
       img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.draggable = false;
       el.appendChild(img);
     }
@@ -106,8 +125,24 @@
     }
 
     track.style.transform = 'translate3d(' + offset + 'px,0,0)';
-    requestAnimationFrame(tick);
+    rafId = running ? requestAnimationFrame(tick) : 0;
   }
+
+  // Stop the loop while the carousel is off screen; resume where it left off.
+  var running = false, rafId = 0;
+  function startLoop() {
+    if (running) return;
+    running = true;
+    lastT = performance.now();
+    rafId = requestAnimationFrame(tick);
+  }
+  function stopLoop() {
+    running = false;
+    cancelAnimationFrame(rafId);
+  }
+  new IntersectionObserver(function (entries) {
+    entries[0].isIntersecting ? startLoop() : stopLoop();
+  }, { rootMargin: '100px 0px' }).observe(carousel);
 
   // -------------------------------------------------------------- hover
   carousel.addEventListener('pointerenter', function (e) {
@@ -180,5 +215,4 @@
   });
 
   build();
-  requestAnimationFrame(tick);
 })();
