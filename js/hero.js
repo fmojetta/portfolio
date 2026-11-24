@@ -29,7 +29,7 @@
   // ---------------------------------------------------------------- config
   // Physics values are "per frame at 60fps" and in CSS px.
   var CONFIG = {
-    stageMs: 6500,          // how long each sentence is shown
+    stageMs: 7500,          // how long each sentence is shown
     stageLastMs: 8000,      // ... and the final one
 
     fidelityRamp: false,    // true: phrases go sketchy -> precise; false: all crisp
@@ -66,7 +66,7 @@
     meltAmp: 7,             // while waiting for the wave, letters loosen into a
                             // ripple of up to this many px ...
     meltCreep: 0.18,        // ... and creep this far toward their new place
-    pourLift: 2.2,          // upward kick at release -> particles arc over
+    pourLift: 1.3,          // upward kick at release -> particles arc over
 
     // stir: cursor
     mouseRadius: 120,
@@ -74,7 +74,7 @@
     part: 0.9,              // gentle outward push so the cursor parts the text
     vortex: 0.035,          // swirl strength, scales with cursor speed
 
-    returnSpeed: 0.02,
+    returnSpeed: 0.03,
     friction: 0.86,         // higher = longer, silkier wakes
     maxDpr: 2,
   };
@@ -89,7 +89,7 @@
 
   var STAGES = slot.dataset.stages.split('|').map(function (s) { return s.trim(); }).filter(Boolean);
   var LAST = STAGES.length - 1;
-  var color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0000ee';
+  var color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6D86FF';
 
   function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -114,7 +114,8 @@
     ease = grow(ease, cap); lnFric = grow(lnFric, cap); spin = grow(spin, cap);
     sz = grow(sz, cap);
     for (var i = capacity; i < cap; i++) {   // no two particles move alike
-      ease[i] = CONFIG.returnSpeed * (0.4 + Math.random() * 1.2);
+      // narrow spread: no slow stragglers leaving the line empty mid-switch
+      ease[i] = CONFIG.returnSpeed * (0.75 + Math.random() * 0.6);
       lnFric[i] = Math.log(CONFIG.friction * (0.97 + Math.random() * 0.04));
       spin[i] = (Math.random() - 0.5) * 0.018;
       // size multiplier: averaging two randoms clusters values near 1, so the

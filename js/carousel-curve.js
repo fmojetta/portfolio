@@ -116,7 +116,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   gl.uniform1i(U.uTex, 0);
   gl.uniform1f(U.uFade, CURVE.fadeStart);
-  var blank = (getComputedStyle(document.documentElement).getPropertyValue('--paper-2').trim() || '#EFE7D8');
+  var blank = (getComputedStyle(document.documentElement).getPropertyValue('--paper-2').trim() || '#1D1B18');
   var bc = parseInt(blank.replace('#', ''), 16);
   gl.uniform3f(U.uBlank, (bc >> 16 & 255) / 255, (bc >> 8 & 255) / 255, (bc & 255) / 255);
 
