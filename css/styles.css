@@ -73,16 +73,14 @@ body {
 .hero__line,
 .hero__slot { display: block; }
 
-/* The slot is drawn by the particle canvas; the crisp text takes over once the
-   last stage has landed. Without JS/WebGL it is simply always visible. */
+/* The slot is drawn by the particle canvas. The crisp text is the static
+   fallback (no JS/WebGL2, or reduced motion); with the canvas running it stays
+   hidden but remains readable to screen readers. */
 .hero__crisp {
   color: var(--accent);
   white-space: nowrap;
-  /* slow, soft cross-fade with the particles (which fade over ~1s) */
-  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1), filter 1.1s cubic-bezier(.4, 0, .2, 1);
 }
-.hero--3d .hero__crisp { opacity: 0; filter: blur(1.5px); }
-.hero--3d.is-crisp .hero__crisp { opacity: 1; filter: none; }
+.hero--3d .hero__crisp { opacity: 0; }
 
 .hero__intro {
   max-width: 54ch;

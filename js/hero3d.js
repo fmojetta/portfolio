@@ -4,8 +4,8 @@
 // 3D particle field (Three.js, WebGL2) that walks through the design process:
 // each stage is rendered at a higher fidelity than the one before -- early
 // stages are sparse, loose, chunky dots; later ones are dense and precise --
-// until the final stage resolves into the crisp HTML text itself. Hovering the
-// crisp text breaks it back into particles.
+// and every stage stays as particles. The crisp HTML text is only the static
+// fallback (no WebGL2, no JS, or reduced motion).
 //
 // Performance (old / low-end machines):
 //   * All particles are ONE draw call (THREE.Points + a tiny shader).
@@ -22,10 +22,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.m
 // Physics values are "per frame at 60fps" and in CSS px.
 const CONFIG = {
   // timing (ms)
-  settleMs: 1700,         // time for the particles to land before the real text takes over
-  holdMs: 4800,           // how long each sentence then stays as real text
-  holdLastMs: 6500,       // ... and the final one ("high-fidelity UI")
-  rebreakMs: 1200,        // after a hover-break, wait this long before re-crisping
+  stageMs: 6500,          // how long each sentence is shown
+  stageLastMs: 8000,      // ... and the final one ("high-fidelity UI")
 
   // fidelity ramp: values at the first stage -> last stage
   gapRamp: [1.7, 1.0],    // sampling gap multiplier (higher = fewer particles)
@@ -47,7 +45,7 @@ const CONFIG = {
 
   // transitions
   morphSpeed: 1.7,        // stage -> stage burst
-  blastSpeed: 3.4,        // crisp -> first stage (full restart) burst
+  blastSpeed: 3.4,        // last stage -> first stage (full restart) burst
   explodeDepth: 1.6,      // z velocity relative to xy -> particles fly at the camera
   scatterHold: 14,
   wander: 1.0,
@@ -62,7 +60,6 @@ const CONFIG = {
 
   returnSpeed: 0.022,
   friction: 0.8,
-  fadeEase: 0.045,        // particle fade speed during the hand-over (lower = softer, ~1s)
 
   maxPixelRatio: 1.5,
 };
@@ -282,7 +279,7 @@ function explode(speed) {
 }
 
 // ------------------------------------------------------------ choreography
-const seq = { stage: 0, t: 0, crisp: false, snapped: false, brokeAt: -1e9 };
+const seq = { stage: 0, t: 0 };
 
 function goStage(i, speed) {
   seq.stage = i;
@@ -291,34 +288,16 @@ function goStage(i, speed) {
   explode(speed);
 }
 
-function setCrisp(on) {
-  if (seq.crisp === on) return;
-  seq.crisp = on;
-  // swap the word only while the real text is invisible, so it never flickers
-  if (on) crisp.textContent = STAGES[seq.stage];
-  seq.snapped = false;
-  hero.classList.toggle('is-crisp', on);
-}
-
 function updateSequence(ms) {
   seq.t += ms;
-  // every sentence: particles land, hand over to the real text, hold, move on
-  const hold = seq.stage === LAST ? CONFIG.holdLastMs : CONFIG.holdMs;
-  const end = CONFIG.settleMs + hold;
+  const end = seq.stage === LAST ? CONFIG.stageLastMs : CONFIG.stageMs;
   if (seq.t > end) {
-    if (hoveringSlot) { seq.t = end - 400; return; }   // don't yank it away mid-play
-    setCrisp(false);
     const last = seq.stage === LAST;
     goStage(last ? 0 : seq.stage + 1, last ? CONFIG.blastSpeed : CONFIG.morphSpeed);
-    return;
-  }
-  if (!seq.crisp && seq.t > CONFIG.settleMs && !hoveringSlot &&
-      seq.t - seq.brokeAt > CONFIG.rebreakMs) {
-    setCrisp(true);
   }
 }
 
-// once crisp, park the (invisible) particles exactly on their targets so the
+// park every particle exactly on its target (used after a quality drop) so the
 // next break starts from a perfect copy of the text
 function snapToHome() {
   pos.set(home.subarray(0, count * 3));
@@ -328,7 +307,6 @@ function snapToHome() {
 
 // ------------------------------------------------------------------ cursor
 const mouse = { active: false, x: 0, y: 0, nx: 0, ny: 0 };
-let hoveringSlot = false;
 const raycaster = new THREE.Raycaster();
 const plane = new THREE.Plane();
 const hit = new THREE.Vector3();
@@ -344,21 +322,10 @@ function pointer(clientX, clientY) {
   mouse.nx = ndc.x;
   mouse.ny = ndc.y;
   mouse.active = true;
-
-  const s = crisp.getBoundingClientRect();
-  const pad = 24;
-  hoveringSlot = clientX > s.left - pad && clientX < s.right + pad &&
-                 clientY > s.top - pad && clientY < s.bottom + pad;
-  if (hoveringSlot && seq.crisp) {
-    // break the polished UI back into particles
-    setCrisp(false);
-    seq.brokeAt = seq.t;
-  }
 }
 
 function pointerOut() {
   mouse.active = false;
-  hoveringSlot = false;
 }
 
 // the content layer sits above the canvas, so listen on the whole hero
@@ -383,10 +350,8 @@ function updateMouseLocal() {
 }
 
 function updateTilt(dtf) {
-  // flatten while the last stage lands, so the hand-over to HTML text is exact
-  const flat = seq.t > CONFIG.settleMs * 0.4;   // level out before every hand-over
-  const tx = !flat && mouse.active ? -mouse.ny * CONFIG.tiltX : 0;
-  const ty = !flat && mouse.active ? mouse.nx * CONFIG.tiltY : 0;
+  const tx = mouse.active ? -mouse.ny * CONFIG.tiltX : 0;
+  const ty = mouse.active ? mouse.nx * CONFIG.tiltY : 0;
   const k = 1 - Math.pow(1 - CONFIG.tiltEase, dtf);
   tilt.x += (tx - tilt.x) * k;
   tilt.y += (ty - tilt.y) * k;
@@ -398,7 +363,7 @@ let camDist = 1000;
 
 function step(dtf) {
   const R = CONFIG.mouseRadius;
-  const mx = mouse.x, my = mouse.y, ma = mouse.active && !seq.crisp;
+  const mx = mouse.x, my = mouse.y, ma = mouse.active;
   const wanderT = CONFIG.wanderThreshold;
   const wander = CONFIG.wander * dtf;
   const zMax = camDist * 0.6;
@@ -471,7 +436,6 @@ function resize() {
   material.uniforms.uDist.value = camDist;
 
   setText(seq.stage);
-  if (seq.crisp) snapToHome();
 }
 
 // ---------------------------------------------------------- adaptive quality
@@ -515,13 +479,7 @@ function frame(now) {
   updateTilt(dtf);
   updateMouseLocal();
 
-  const target = seq.crisp ? 0 : 1;
-  const u = material.uniforms.uOpacity;
-  u.value += (target - u.value) * (1 - Math.pow(1 - CONFIG.fadeEase, dtf));
-  // keep the particles moving while they fade out; once invisible, park them
-  // exactly on their targets so the next break starts from a clean copy
-  if (!seq.crisp || u.value > 0.02) step(dtf);
-  else if (!seq.snapped) { snapToHome(); seq.snapped = true; }
+  step(dtf);
 
   renderer.render(scene, camera);
   adapt(ms);
@@ -566,7 +524,7 @@ async function boot() {
     await document.fonts.ready;
   } catch (_) { /* use whatever font is available */ }
 
-  hero.classList.add('hero--3d');   // hides the crisp text until its turn
+  hero.classList.add('hero--3d');   // hides the static fallback text
   resize();
   // start the first stage scattered across the hero, flying in
   for (let i = 0; i < count; i++) {
