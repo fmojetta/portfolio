@@ -45,6 +45,8 @@
       gapMin: 1.1,
       particleSizeMin: 0.5,
       sizeVar: 0.2,
+      drift: 0.55,          // calmer wandering on small text
+      alphaFloor: 0.6,      // keep thin strokes readable: no very dim dots
     },
 
     gap: 2.2,               // px between points at gapRefSize, full fidelity
@@ -52,6 +54,14 @@
     gapMin: 1.3,
     particleSize: 1.15,     // dot radius (CSS px) at full fidelity
     particleSizeMin: 0.6,
+    // individuality: every particle has its own size, brightness, twinkle
+    // and drift, so the field feels alive rather than uniform
+    alphaMin: 0.45,         // dimmest particle (1 = all fully opaque)
+    twinkle: 0.35,          // how much each particle's brightness pulses
+    twinkleSpeed: [0.5, 2.2], // range of pulse speeds (radians per second)
+    driftAmp: [0.3, 1.6],   // range of each particle's own wandering radius (px)
+    driftSpeed: [0.25, 0.9],// range of wandering speeds (radians per second)
+    bigDots: 0.12,          // share of particles that are noticeably larger
     sizeVar: 0.45,          // per-particle size spread: most dots near the base
                             // size, a few noticeably bigger or smaller (0 = uniform)
 
@@ -95,7 +105,8 @@
 
   // -------------------------------------------------------- particle state
   var capacity = 0, count = 0;
-  var px, py, vx, vy, hx, hy, ox, oy, hold, hs, ease, lnFric, spin, sz;
+  var px, py, vx, vy, hx, hy, ox, oy, hold, hs, ease, lnFric, spin, sz,
+      al, tw, tp, da, dfx, dfy, dpx, dpy;   // alpha, twinkle speed/phase, drift amp/freq/phase
 
   function grow(old, cap) {
     var a = new Float32Array(cap);
@@ -113,6 +124,9 @@
     hold = grow(hold, cap); hs = grow(hs, cap);
     ease = grow(ease, cap); lnFric = grow(lnFric, cap); spin = grow(spin, cap);
     sz = grow(sz, cap);
+    al = grow(al, cap); tw = grow(tw, cap); tp = grow(tp, cap);
+    da = grow(da, cap); dfx = grow(dfx, cap); dfy = grow(dfy, cap);
+    dpx = grow(dpx, cap); dpy = grow(dpy, cap);
     for (var i = capacity; i < cap; i++) {   // no two particles move alike
       // narrow spread: no slow stragglers leaving the line empty mid-switch
       ease[i] = CONFIG.returnSpeed * (0.75 + Math.random() * 0.6);
@@ -121,7 +135,18 @@
       // size multiplier: averaging two randoms clusters values near 1, so the
       // field reads as organic grain with the odd larger droplet
       var r = (Math.random() + Math.random()) / 2 - 0.5;   // -0.5..0.5, peaked at 0
+      // a few noticeably bigger "droplets" among mostly ordinary dots
+      if (Math.random() < CONFIG.bigDots) r = 0.5 + Math.random() * 0.5;
       sz[i] = r;   // raw spread; scaled by sizeVarNow at draw time
+      var rnd = function (a) { return a[0] + Math.random() * (a[1] - a[0]); };
+      al[i] = CONFIG.alphaMin + Math.random() * (1 - CONFIG.alphaMin);
+      tw[i] = rnd(CONFIG.twinkleSpeed) / 1000;            // per ms
+      tp[i] = Math.random() * Math.PI * 2;
+      da[i] = rnd(CONFIG.driftAmp);
+      dfx[i] = rnd(CONFIG.driftSpeed) / 1000;
+      dfy[i] = rnd(CONFIG.driftSpeed) / 1000;             // different x/y rates
+      dpx[i] = Math.random() * Math.PI * 2;               // -> each traces its
+      dpy[i] = Math.random() * Math.PI * 2;               //    own little orbit
     }
     capacity = cap;
   }
@@ -136,6 +161,8 @@
   var dotR = 1;      // current dot radius, CSS px (eases toward dotTarget)
   var dotTarget = 1;
   var sizeVarNow = CONFIG.sizeVar;   // size spread for the current text size
+  var driftNow = 1;                  // drift scale for the current text size
+  var alphaFloor = 0;                // minimum dot opacity for the current size
   var cache = [];    // pre-sampled stages, rebuilt on resize, so switching
                      // sentences never stalls a frame on text rasterising
 
@@ -181,6 +208,8 @@
     var realGap = step / SS;
     var jitter = lerp(ramp.jitterRamp[0], ramp.jitterRamp[1], fidelity) * realGap;
     sizeVarNow = small ? CONFIG.small.sizeVar : CONFIG.sizeVar;
+    driftNow = small ? CONFIG.small.drift : 1;
+    alphaFloor = small ? CONFIG.small.alphaFloor : 0;
 
     var baseR = Math.max(small ? CONFIG.small.particleSizeMin : CONFIG.particleSizeMin, CONFIG.particleSize * (realGap / gapMul / CONFIG.gap));
     var radius = baseR * lerp(CONFIG.sizeRamp[0], CONFIG.sizeRamp[1], fidelity);
@@ -345,7 +374,11 @@
       // ripples as one surface rather than jittering dot by dot
       var fx = Math.sin(by * K + T) + 0.5 * Math.sin((bx + by) * K * 1.7 - T * 1.3);
       var fy = Math.cos(bx * K - T * 0.9) + 0.5 * Math.cos((bx - by) * K * 1.3 + T * 1.1);
-      var ex = bx + fx * amp - x, ey = by + fy * amp - y;
+      // each particle's own wandering orbit around its target
+      var dr = da[i] * driftNow;
+      var wx = Math.sin(clockMs * dfx[i] + dpx[i]) * dr;
+      var wy = Math.cos(clockMs * dfy[i] + dpy[i]) * dr;
+      var ex = bx + fx * amp + wx - x, ey = by + fy * amp + wy - y;
       var e = ease[i] * dtf, s = spin[i] * dtf;
       ux += ex * e - ey * s;   // spring toward the drifting target, curling in
       uy += ey * e + ex * s;
@@ -361,20 +394,34 @@
     mouse.vx *= decay; mouse.vy *= decay;
   }
 
+  // Per-particle brightness: particles are sorted into a few opacity
+  // buckets each frame, then each bucket is drawn as one path (a handful of
+  // fills instead of thousands).
+  var BUCKETS = 6;
   function draw() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = color;
-    ctx.beginPath();
     var TAU = Math.PI * 2;
     var sv = sizeVarNow * 2;
-    for (var i = 0; i < count; i++) {
-      var r = dotR * Math.max(0.35, 1 + sz[i] * sv);
-      ctx.moveTo(px[i] + r, py[i]);
-      ctx.arc(px[i], py[i], r, 0, TAU);
+    var tA = CONFIG.twinkle, t = clockMs;
+    for (var b = 0; b < BUCKETS; b++) {
+      var lo = b / BUCKETS, hi = (b + 1) / BUCKETS;
+      ctx.globalAlpha = (b + 0.5) / BUCKETS;
+      ctx.beginPath();
+      for (var i = 0; i < count; i++) {
+        var a = al[i] * (1 - tA * 0.5 + tA * 0.5 * Math.sin(t * tw[i] + tp[i]));
+        if (a < alphaFloor) a = alphaFloor;
+        if (a < lo || (a >= hi && b !== BUCKETS - 1)) continue;
+        var r = dotR * Math.max(0.35, 1 + sz[i] * sv);
+        ctx.moveTo(px[i] + r, py[i]);
+        ctx.arc(px[i], py[i], r, 0, TAU);
+      }
+      ctx.fill();
     }
-    ctx.fill();
+    ctx.globalAlpha = 1;
   }
+
 
   // ----------------------------------------------------------------- setup
   function resize() {
