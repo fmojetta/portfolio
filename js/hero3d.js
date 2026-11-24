@@ -22,9 +22,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.m
 // Physics values are "per frame at 60fps" and in CSS px.
 const CONFIG = {
   // timing (ms)
-  stageMs: 2100,          // how long each low-fi stage is shown
+  stageMs: 3600,          // how long each low-fi stage is shown
   settleMs: 1300,         // final stage: time for particles to land before going crisp
-  holdMs: 3800,           // final stage: how long the crisp text stays
+  holdMs: 5500,           // final stage: how long the crisp text stays
   rebreakMs: 1200,        // after a hover-break, wait this long before re-crisping
 
   // fidelity ramp: values at the first stage -> last stage
