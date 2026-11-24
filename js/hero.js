@@ -37,6 +37,15 @@
     jitterRamp: [0.7, 0.1], // positional noise, in units of the gap (sketchiness)
     sizeRamp: [1.5, 1.0],   // dot size multiplier (chunky -> fine)
 
+    // overrides for small text (headline under 48px, i.e. phones)
+    small: {
+      gapRamp: [1.25, 1.0],
+      jitterRamp: [0.3, 0.05],
+      gapMin: 1.1,
+      particleSizeMin: 0.5,
+      sizeVar: 0.2,
+    },
+
     gap: 2.2,               // px between points at gapRefSize, full fidelity
     gapRefSize: 100,
     gapMin: 1.3,
@@ -110,7 +119,7 @@
       // size multiplier: averaging two randoms clusters values near 1, so the
       // field reads as organic grain with the odd larger droplet
       var r = (Math.random() + Math.random()) / 2 - 0.5;   // -0.5..0.5, peaked at 0
-      sz[i] = Math.max(0.35, 1 + r * 2 * CONFIG.sizeVar);
+      sz[i] = r;   // raw spread; scaled by sizeVarNow at draw time
     }
     capacity = cap;
   }
@@ -124,6 +133,7 @@
   var W = 0, H = 0, dpr = 1;
   var dotR = 1;      // current dot radius, CSS px (eases toward dotTarget)
   var dotTarget = 1;
+  var sizeVarNow = CONFIG.sizeVar;   // size spread for the current text size
   var cache = [];    // pre-sampled stages, rebuilt on resize, so switching
                      // sentences never stalls a frame on text rasterising
 
@@ -158,13 +168,19 @@
     octx.fillText(text, (cx - left) * SS, (baseline - top) * SS);
     var data = octx.getImageData(0, 0, w, h).data;
 
-    var gapMul = lerp(CONFIG.gapRamp[0], CONFIG.gapRamp[1], fidelity);
-    var gap = Math.max(CONFIG.gapMin, CONFIG.gap * size / CONFIG.gapRefSize) * gapMul;
+    // Small text (phones) has thin strokes, so it needs denser, calmer dots
+    // to stay legible: a finer gap, a flatter fidelity ramp and less noise.
+    var small = size < 48;
+    var ramp = small ? CONFIG.small : CONFIG;
+    var gapMul = lerp(ramp.gapRamp[0], ramp.gapRamp[1], fidelity);
+    var gap = Math.max(small ? CONFIG.small.gapMin : CONFIG.gapMin,
+                       CONFIG.gap * size / CONFIG.gapRefSize) * gapMul;
     var step = Math.max(1, Math.round(gap * SS));
     var realGap = step / SS;
-    var jitter = lerp(CONFIG.jitterRamp[0], CONFIG.jitterRamp[1], fidelity) * realGap;
+    var jitter = lerp(ramp.jitterRamp[0], ramp.jitterRamp[1], fidelity) * realGap;
+    sizeVarNow = small ? CONFIG.small.sizeVar : CONFIG.sizeVar;
 
-    var baseR = Math.max(CONFIG.particleSizeMin, CONFIG.particleSize * (realGap / gapMul / CONFIG.gap));
+    var baseR = Math.max(small ? CONFIG.small.particleSizeMin : CONFIG.particleSizeMin, CONFIG.particleSize * (realGap / gapMul / CONFIG.gap));
     var radius = baseR * lerp(CONFIG.sizeRamp[0], CONFIG.sizeRamp[1], fidelity);
 
     var out = [];
@@ -349,8 +365,9 @@
     ctx.fillStyle = color;
     ctx.beginPath();
     var TAU = Math.PI * 2;
+    var sv = sizeVarNow * 2;
     for (var i = 0; i < count; i++) {
-      var r = dotR * sz[i];
+      var r = dotR * Math.max(0.35, 1 + sz[i] * sv);
       ctx.moveTo(px[i] + r, py[i]);
       ctx.arc(px[i], py[i], r, 0, TAU);
     }

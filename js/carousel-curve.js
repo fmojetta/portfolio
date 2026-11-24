@@ -133,7 +133,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    return { el: el, media: media, tex: tex, ready: false, last: -1,
+    return { el: el, media: media, tex: tex, ready: false, last: -1, seenAt: 0,
              c: document.createElement('canvas') };
   }
 
@@ -184,7 +184,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
     wallR = (W / 2) / Math.tan(thMax);
     gl.uniform1f(U.uR, wallR);
     gl.uniform1f(U.uMax, thMax);
-    slots.forEach(function (s) { s.ready = false; s.last = -1; });
+    slots.forEach(function (s) { s.ready = false; s.last = -1; s.seenAt = 0; });
   }
 
   function render(offset, centers, widths, itemH, padTop, radius) {
@@ -204,6 +204,14 @@ window.createCarouselCurve = function (carousel, track, opts) {
       if (x > cx + span || x + w < cx - span) continue;
       var s = slots[i];
       upload(s, w, itemH);
+      // Watchdog: some browsers (Firefox, notably on Android) never decode
+      // frames for a video whose element is invisible. If an on-screen video
+      // hasn't produced a frame in time, hand back to the DOM carousel.
+      if (!s.ready && s.media && s.media.tagName === 'VIDEO') {
+        var now = performance.now();
+        if (!s.seenAt) s.seenAt = now;
+        else if (now - s.seenAt > 2500) { fail(); return; }
+      }
       gl.bindTexture(gl.TEXTURE_2D, s.tex);
       gl.uniform1f(U.uReady, s.ready ? 1 : 0);
       gl.uniform4f(U.uRect, x, padTop, w, itemH);
@@ -212,12 +220,20 @@ window.createCarouselCurve = function (carousel, track, opts) {
     }
   }
 
-  // the GPU can drop the context (driver reset, too many tabs): fall back
-  canvas.addEventListener('webglcontextlost', function (e) {
-    e.preventDefault();
+  // Give the carousel back to the DOM/CSS version for good.
+  var failed = false;
+  function fail() {
+    if (failed) return;
+    failed = true;
     carousel.classList.remove('carousel--gl');
     canvas.remove();
     if (opts && opts.onLost) opts.onLost();
+  }
+
+  // the GPU can drop the context (driver reset, too many tabs): fall back
+  canvas.addEventListener('webglcontextlost', function (e) {
+    e.preventDefault();
+    fail();
   });
 
   resize();

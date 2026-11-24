@@ -282,7 +282,15 @@
   if (window.createCarouselCurve) {
     try {
       curve = window.createCarouselCurve(carousel, track, {
-        onLost: function () { curve = null; }
+        onLost: function () {
+          curve = null;
+          // the DOM items are visible again: make sure their videos run
+          var vids = track.querySelectorAll('video');
+          for (var i = 0; i < vids.length; i++) {
+            var p = vids[i].play();
+            if (p && p.catch) p.catch(function () {});
+          }
+        }
       });
     } catch (e) { curve = null; }
     if (curve) readBox();
