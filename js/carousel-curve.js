@@ -1,9 +1,11 @@
 // ------------------------------------------- carousel: curved-wall renderer
-// Draws the carousel items on a WebGL canvas and bends them like the inside
-// of a sphere: the middle of the strip stays flat, and only close to the
-// screen edges does the wall curve -- each image grows taller and squeezes
-// narrower progressively along its width, so its top and bottom edges bow
-// into real curves before it dissolves into the edge.
+// Draws the carousel items on a WebGL canvas as if they were printed on the
+// inside wall of a cylinder around the viewer, using the real projection:
+// a point at distance s along the wall sits at angle th = s / R, and lands on
+// screen at  x = R * tan(th),  y = y / cos(th).
+// Near the centre that is almost flat; towards the edges both factors grow
+// smoothly and ever faster, so images widen and grow taller there and their
+// top and bottom edges bow into continuous curves -- then dissolve.
 //
 // No libraries: one tiny shader program, one subdivided quad per item.
 // carousel.js keeps doing layout, the loop, drag and video playback on the
@@ -13,10 +15,11 @@ window.createCarouselCurve = function (carousel, track, opts) {
   'use strict';
 
   var CURVE = {
-    edgeStart: 0.42,   // where the curve begins (0 = centre, 1 = screen edge)
-    bulge: 0.38,       // extra height at the very edge (0.38 = +38%)
-    squeeze: 0.22,     // how much items narrow as they reach the edge
-    fadeStart: 0.86,   // where items start dissolving into the edge
+    angle: 44,         // how far round the wall you see at the screen edge (deg).
+                       // Higher = stronger curve; the edge is 1/cos(angle) taller
+                       // (44deg -> +39%)
+    angleSmall: 34,    // the same on narrow screens
+    fadeStart: 0.86,   // fraction of that angle where items start dissolving
     segments: 48,      // columns per item -> smoothness of the curve
     maxDpr: 1.5,
   };
@@ -32,20 +35,17 @@ window.createCarouselCurve = function (carousel, track, opts) {
     'attribute vec2 a;',             // 0..1 across the item
     'uniform vec4 uRect;',           // x, y, w, h in CSS px (carousel box)
     'uniform vec2 uView;',           // carousel box size, CSS px
-    'uniform float uEdge, uBulge, uSqueeze, uFade;',
-    'varying vec2 vUv;',
+    'uniform float uR, uMax, uFade;',// wall radius (px), max angle (rad), fade start
     'varying vec2 vLocal;',
+    'varying vec2 vUv;',
     'varying float vAlpha;',
     'void main() {',
     '  vec2 p = uRect.xy + a * uRect.zw;',
     '  vec2 c = uView * 0.5;',
-    '  float u = (p.x - c.x) / c.x;',                    // -1 left .. +1 right
-    '  float t = smoothstep(uEdge, 1.0, abs(u));',       // 0 until near the edge
-    '  float k = t * t;',                                // ease in: a curve, not a ramp
-    '  p.y = c.y + (p.y - c.y) * (1.0 + uBulge * k);',   // taller towards the edge
-    '  p.x = c.x + (p.x - c.x) * (1.0 - uSqueeze * k * abs(u));', // squeezed in
-    '  float u2 = abs((p.x - c.x) / c.x);',
-    '  vAlpha = 1.0 - smoothstep(uFade, 1.02, u2);',
+    '  float th = clamp((p.x - c.x) / uR, -1.45, 1.45);',  // angle round the wall
+    '  p.x = c.x + uR * tan(th);',
+    '  p.y = c.y + (p.y - c.y) / cos(th);',
+    '  vAlpha = 1.0 - smoothstep(uFade, 1.0, abs(th) / uMax);',
     '  vUv = a;',
     '  vLocal = a * uRect.zw;',
     '  vec2 ndc = p / uView * 2.0 - 1.0;',
@@ -94,7 +94,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
   }
   gl.useProgram(prog);
   var U = {};
-  ['uRect', 'uView', 'uEdge', 'uBulge', 'uSqueeze', 'uFade', 'uTex', 'uReady',
+  ['uRect', 'uView', 'uR', 'uMax', 'uFade', 'uTex', 'uReady',
    'uBlank', 'uSize', 'uRadius'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
 
   // one subdivided strip (N columns x 1 row) shared by every item
@@ -115,9 +115,6 @@ window.createCarouselCurve = function (carousel, track, opts) {
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   gl.uniform1i(U.uTex, 0);
-  gl.uniform1f(U.uEdge, CURVE.edgeStart);
-  gl.uniform1f(U.uBulge, CURVE.bulge);
-  gl.uniform1f(U.uSqueeze, CURVE.squeeze);
   gl.uniform1f(U.uFade, CURVE.fadeStart);
   var blank = (getComputedStyle(document.documentElement).getPropertyValue('--paper-2').trim() || '#EFE7D8');
   var bc = parseInt(blank.replace('#', ''), 16);
@@ -153,7 +150,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
       return;   // images upload once
     }
     // texture at ~display resolution (with the edge bulge), never above source
-    var th = Math.min(mh, Math.round(h * dpr * (1 + CURVE.bulge)));
+    var th = Math.min(mh, Math.round(h * dpr / Math.cos(thMax)));
     var tw = Math.max(1, Math.round(th * w / h));
     if (s.c.width !== tw || s.c.height !== th) { s.c.width = tw; s.c.height = th; }
     var cx = s.c.getContext('2d');
@@ -167,7 +164,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
   }
 
   // ------------------------------------------------------------- render
-  var W = 0, H = 0, dpr = 1;
+  var W = 0, H = 0, dpr = 1, wallR = 1, thMax = 1;
   canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
   carousel.style.position = 'relative';
   carousel.appendChild(canvas);
@@ -181,11 +178,12 @@ window.createCarouselCurve = function (carousel, track, opts) {
     canvas.height = Math.round(H * dpr);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(U.uView, W, H);
-    // narrow screens: items are wide relative to the view, so a gentler curve
-    var small = W < 640;
-    gl.uniform1f(U.uEdge, small ? 0.55 : CURVE.edgeStart);
-    gl.uniform1f(U.uBulge, small ? CURVE.bulge * 0.45 : CURVE.bulge);
-    gl.uniform1f(U.uSqueeze, small ? CURVE.squeeze * 0.5 : CURVE.squeeze);
+    // wall radius such that the screen edge sits at the chosen angle
+    var deg = W < 640 ? CURVE.angleSmall : CURVE.angle;
+    thMax = deg * Math.PI / 180;
+    wallR = (W / 2) / Math.tan(thMax);
+    gl.uniform1f(U.uR, wallR);
+    gl.uniform1f(U.uMax, thMax);
     slots.forEach(function (s) { s.ready = false; s.last = -1; });
   }
 
@@ -201,10 +199,9 @@ window.createCarouselCurve = function (carousel, track, opts) {
     gl.activeTexture(gl.TEXTURE0);
     for (var i = 0; i < slots.length; i++) {
       var w = widths[i], x = centers[i] + offset - w / 2;
-      // the edge squeeze pulls items from beyond the screen into view, so
-      // cull against the widened (unwarped) range
-      var reach = W * (0.5 + CURVE.squeeze);
-      if (x > W + reach || x + w < -reach) continue;
+      // visible wall: |s| <= R * maxAngle around the centre
+      var span = wallR * thMax, cx = W / 2;
+      if (x > cx + span || x + w < cx - span) continue;
       var s = slots[i];
       upload(s, w, itemH);
       gl.bindTexture(gl.TEXTURE_2D, s.tex);
