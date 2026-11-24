@@ -6,7 +6,8 @@
 // sparse, loose, chunky dots; later ones are dense and precise. No libraries.
 //
 // Liquid feel:
-//   * flow    -- a slow, smooth current keeps every letter gently rippling
+//   * flow    -- a smooth current; off at rest (flowAmp 0), used only to
+//                loosen the letters while they wait for the pour wave
 //   * stir    -- the cursor drags particles along its own movement and leaves
 //                a swirling wake, like a hand through water
 //   * pour    -- between sentences the particles stream to the next word in a
@@ -45,15 +46,15 @@
                             // size, a few noticeably bigger or smaller (0 = uniform)
 
     // flow: a smooth current that ripples the letters (CSS px, radians/ms)
-    flowAmp: 1.8,           // how far a particle drifts from its home
+    flowAmp: 0,             // resting ripple (px); 0 = letters sit still once formed
     flowScale: 0.018,       // spatial frequency (lower = broader waves)
     flowSpeed: 0.0007,      // how fast the current changes
 
     // pour: stage -> stage transition
     pourMs: 800,            // left-to-right sweep duration of the wave
     pourJitter: 200,        // random extra delay per particle (ms)
-    meltAmp: 3,             // while waiting for the wave, letters loosen up to
-                            // (1 + meltAmp) x the normal ripple ...
+    meltAmp: 7,             // while waiting for the wave, letters loosen into a
+                            // ripple of up to this many px ...
     meltCreep: 0.18,        // ... and creep this far toward their new place
     pourLift: 2.2,          // upward kick at release -> particles arc over
 
@@ -314,7 +315,7 @@
         var creep = pr * pr * CONFIG.meltCreep;
         bx = ox[i] + (hx[i] - ox[i]) * creep;
         by = oy[i] + (hy[i] - oy[i]) * creep;
-        amp = A * (1 + pr * CONFIG.meltAmp);
+        amp = A + pr * CONFIG.meltAmp;
         hold[i] -= dtf;
         if (hold[i] <= 0) {        // released: arc up and over to the new word
           uy -= CONFIG.pourLift * (0.6 + Math.random() * 0.8);
