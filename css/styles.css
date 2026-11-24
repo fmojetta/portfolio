@@ -127,6 +127,23 @@ body {
 }
 .hero__intro a:hover { color: var(--accent-dark); }
 
+/* external-link arrow (Lucide arrow-up-right); nudges up-right on hover */
+.ext-arrow {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-left: .1em;
+  vertical-align: -.14em;
+  color: var(--accent);
+  overflow: visible;
+}
+.ext-arrow .ai-g { transition: transform .3s cubic-bezier(.42, 0, .58, 1); }
+.hero__intro a:hover .ext-arrow .ai-g,
+.hero__intro a:focus-visible .ext-arrow .ai-g { transform: translate(2px, -2px); }
+@media (prefers-reduced-motion: reduce) {
+  .ext-arrow .ai-g { transition: none; }
+}
+
 /* product logo that pops up above the link on hover / keyboard focus */
 .hero__intro a { position: relative; }
 .logo-pop {
