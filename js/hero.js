@@ -32,6 +32,7 @@
     stageMs: 6500,          // how long each sentence is shown
     stageLastMs: 8000,      // ... and the final one
 
+    fidelityRamp: false,    // true: phrases go sketchy -> precise; false: all crisp
     // fidelity ramp: first stage -> last stage
     gapRamp: [1.7, 1.0],    // sampling gap multiplier (higher = fewer particles)
     jitterRamp: [0.7, 0.1], // positional noise, in units of the gap (sketchiness)
@@ -197,7 +198,7 @@
 
   function buildCache() {
     cache = STAGES.map(function (text, i) {
-      return sample(text, LAST > 0 ? i / LAST : 1);
+      return sample(text, CONFIG.fidelityRamp && LAST > 0 ? i / LAST : 1);
     });
   }
 
