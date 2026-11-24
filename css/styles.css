@@ -539,7 +539,7 @@ body {
   font-size: 1.05rem;
   line-height: 1.7;
   color: var(--ink-body);
-  max-width: 68ch;
+  max-width: 62ch;   /* ~70 characters per line in this face */
   text-wrap: pretty;
 }
 
@@ -579,7 +579,7 @@ body {
 .project__links a:focus-visible { border-bottom-color: var(--accent); }
 
 .project__section ul {
-  max-width: 68ch;
+  max-width: 62ch;   /* ~70 characters per line in this face */
   list-style: none;
   display: grid;
   gap: .6rem;
