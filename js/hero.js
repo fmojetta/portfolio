@@ -56,8 +56,15 @@
     particleSizeMin: 0.6,
     // individuality: every particle has its own size, brightness, twinkle
     // and drift, so the field feels alive rather than uniform
-    alphaMin: 0.45,         // dimmest particle (1 = all fully opaque)
-    twinkle: 0.35,          // how much each particle's brightness pulses
+    // electric look: bright blue dots, near-white sparks at the top of each
+    // twinkle, a soft blue halo, and additive blending so dense spots glow
+    dotColor: '#8EA2FF',
+    sparkColor: '#E2E8FF',
+    glowColor: '#3B5BFF',
+    glowSize: 2.8,          // halo radius x dot radius
+    glowAlpha: 0.11,
+    alphaMin: 0.7,          // dimmest particle (1 = all fully opaque)
+    twinkle: 0.45,          // how much each particle's brightness pulses
     twinkleSpeed: [0.5, 2.2], // range of pulse speeds (radians per second)
     driftAmp: [0.3, 1.6],   // range of each particle's own wandering radius (px)
     driftSpeed: [0.25, 0.9],// range of wandering speeds (radians per second)
@@ -99,7 +106,6 @@
 
   var STAGES = slot.dataset.stages.split('|').map(function (s) { return s.trim(); }).filter(Boolean);
   var LAST = STAGES.length - 1;
-  var color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6D86FF';
 
   function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -401,18 +407,34 @@
   function draw() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = color;
+    ctx.globalCompositeOperation = 'lighter';   // overlaps add up -> glow
     var TAU = Math.PI * 2;
     var sv = sizeVarNow * 2;
     var tA = CONFIG.twinkle, t = clockMs;
+
+    // 1. soft halo behind every dot (one path, one fill)
+    ctx.fillStyle = CONFIG.glowColor;
+    ctx.globalAlpha = CONFIG.glowAlpha;
+    ctx.beginPath();
+    var g = CONFIG.glowSize;
+    for (var i = 0; i < count; i++) {
+      var gr = dotR * g * Math.max(0.35, 1 + sz[i] * sv);
+      ctx.moveTo(px[i] + gr, py[i]);
+      ctx.arc(px[i], py[i], gr, 0, TAU);
+    }
+    ctx.fill();
+
+    // 2. the dots, by brightness bucket; the brightest bucket is a spark
     for (var b = 0; b < BUCKETS; b++) {
       var lo = b / BUCKETS, hi = (b + 1) / BUCKETS;
-      ctx.globalAlpha = (b + 0.5) / BUCKETS;
+      var top = b === BUCKETS - 1;
+      ctx.fillStyle = top ? CONFIG.sparkColor : CONFIG.dotColor;
+      ctx.globalAlpha = top ? 1 : hi;
       ctx.beginPath();
-      for (var i = 0; i < count; i++) {
+      for (i = 0; i < count; i++) {
         var a = al[i] * (1 - tA * 0.5 + tA * 0.5 * Math.sin(t * tw[i] + tp[i]));
         if (a < alphaFloor) a = alphaFloor;
-        if (a < lo || (a >= hi && b !== BUCKETS - 1)) continue;
+        if (a < lo || (a >= hi && !top)) continue;
         var r = dotR * Math.max(0.35, 1 + sz[i] * sv);
         ctx.moveTo(px[i] + r, py[i]);
         ctx.arc(px[i], py[i], r, 0, TAU);
@@ -420,7 +442,9 @@
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
   }
+
 
 
   // ----------------------------------------------------------------- setup
