@@ -126,6 +126,43 @@ body {
   transition: color .18s ease;
 }
 .hero__intro a:hover { color: var(--accent-dark); }
+
+/* product logo that pops up above the link on hover / keyboard focus */
+.hero__intro a { position: relative; }
+.logo-pop {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translate(-50%, 10px) scale(.6) rotate(-10deg);
+  transform-origin: 50% 100%;
+  transition:
+    opacity .22s ease,
+    filter .3s ease,
+    transform .45s cubic-bezier(.34, 1.56, .64, 1);   /* slight overshoot */
+}
+.logo-pop img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 11px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .5);
+}
+.hero__intro a:hover .logo-pop,
+.hero__intro a:focus-visible .logo-pop {
+  opacity: 1;
+  filter: none;
+  transform: translate(-50%, 0) scale(1) rotate(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-pop { transform: translate(-50%, 0); filter: none; transition: opacity .2s ease; }
+  .hero__intro a:hover .logo-pop,
+  .hero__intro a:focus-visible .logo-pop { transform: translate(-50%, 0); }
+}
 .hero__intro a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
 /* --------------------------------------------------------------- ctas */
