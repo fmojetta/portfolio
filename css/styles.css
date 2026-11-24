@@ -74,13 +74,13 @@ body {
 .hero__slot { display: block; }
 
 /* The slot is drawn by the particle canvas. The crisp text is the static
-   fallback (no JS/WebGL2, or reduced motion); with the canvas running it stays
+   fallback (no JS, or reduced motion); with the canvas running it stays
    hidden but remains readable to screen readers. */
 .hero__crisp {
   color: var(--accent);
   white-space: nowrap;
 }
-.hero--3d .hero__crisp { opacity: 0; }
+.hero--canvas .hero__crisp { opacity: 0; }
 
 .hero__intro {
   max-width: 54ch;
