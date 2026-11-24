@@ -1,4 +1,4 @@
-// Hero: "I turn insights into [user flows → prototypes → high-fidelity UI]"
+// Hero: "I love making things [look right → work in code → think with AI]"
 //
 // The headline is real, static HTML. Its last line (the "slot") is drawn by a
 // 2D canvas particle field that walks through the design process: each stage
@@ -30,7 +30,7 @@
   // Physics values are "per frame at 60fps" and in CSS px.
   var CONFIG = {
     stageMs: 6500,          // how long each sentence is shown
-    stageLastMs: 8000,      // ... and the final one ("high-fidelity UI")
+    stageLastMs: 8000,      // ... and the final one
 
     // fidelity ramp: first stage -> last stage
     gapRamp: [1.7, 1.0],    // sampling gap multiplier (higher = fewer particles)
