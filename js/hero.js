@@ -41,6 +41,8 @@
     gapMin: 1.3,
     particleSize: 1.15,     // dot radius (CSS px) at full fidelity
     particleSizeMin: 0.6,
+    sizeVar: 0.45,          // per-particle size spread: most dots near the base
+                            // size, a few noticeably bigger or smaller (0 = uniform)
 
     // flow: a smooth current that ripples the letters (CSS px, radians/ms)
     flowAmp: 1.8,           // how far a particle drifts from its home
@@ -79,7 +81,7 @@
 
   // -------------------------------------------------------- particle state
   var capacity = 0, count = 0;
-  var px, py, vx, vy, hx, hy, ox, oy, hold, ease, lnFric, spin;
+  var px, py, vx, vy, hx, hy, ox, oy, hold, ease, lnFric, spin, sz;
 
   function grow(old, cap) {
     var a = new Float32Array(cap);
@@ -96,10 +98,15 @@
     ox = grow(ox, cap); oy = grow(oy, cap);
     hold = grow(hold, cap);
     ease = grow(ease, cap); lnFric = grow(lnFric, cap); spin = grow(spin, cap);
+    sz = grow(sz, cap);
     for (var i = capacity; i < cap; i++) {   // no two particles move alike
       ease[i] = CONFIG.returnSpeed * (0.4 + Math.random() * 1.2);
       lnFric[i] = Math.log(CONFIG.friction * (0.97 + Math.random() * 0.04));
       spin[i] = (Math.random() - 0.5) * 0.018;
+      // size multiplier: averaging two randoms clusters values near 1, so the
+      // field reads as organic grain with the odd larger droplet
+      var r = (Math.random() + Math.random()) / 2 - 0.5;   // -0.5..0.5, peaked at 0
+      sz[i] = Math.max(0.35, 1 + r * 2 * CONFIG.sizeVar);
     }
     capacity = cap;
   }
@@ -320,8 +327,9 @@
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = color;
     ctx.beginPath();
-    var r = dotR, TAU = Math.PI * 2;
+    var TAU = Math.PI * 2;
     for (var i = 0; i < count; i++) {
+      var r = dotR * sz[i];
       ctx.moveTo(px[i] + r, py[i]);
       ctx.arc(px[i], py[i], r, 0, TAU);
     }
