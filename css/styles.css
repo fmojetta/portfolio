@@ -114,6 +114,19 @@ body {
   line-height: 1.6;
   color: var(--ink-soft);
 }
+/* product links inside the intro (the text layer ignores the pointer, so
+   links opt back in) */
+.hero__intro a {
+  pointer-events: auto;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: .2em;
+  transition: color .18s ease;
+}
+.hero__intro a:hover { color: var(--accent-dark); }
+.hero__intro a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
 /* --------------------------------------------------------------- ctas */
 .hero__actions {
