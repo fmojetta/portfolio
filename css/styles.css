@@ -336,10 +336,7 @@ body {
   font-weight: 600;
   padding: 14px 26px;
   border-radius: 999px;
-  transition: gap .3s cubic-bezier(.2,.7,.3,1);
 }
-.pc__btn svg { width: 1.1em; height: 1.1em; }
-.pc:hover .pc__btn { gap: .8em; }
 
 @media (prefers-reduced-motion: reduce) {
   .pc, .pc__media img, .pc__btn { transition: none; }
@@ -564,4 +561,39 @@ body {
 @media (max-width: 640px) {
   .project__nav { padding: 1.25rem 1.25rem 0; }
   .project { padding: 1.5rem 1.25rem 4rem; }
+}
+
+/* ------------------------------------------------- animated icons -----
+   Lucide icons with the hover animations of Animate UI
+   (animate-ui.com/docs/icons/lucide-icons), ported from their Motion
+   variants to plain CSS. The animation plays while the parent button or
+   card is hovered or keyboard-focused, like <AnimateIcon animateOnHover>. */
+.ai-icon { width: 1.15em; height: 1.15em; flex: 0 0 auto; overflow: visible; }
+.ai-icon .ai-g { transform-box: view-box; }
+.ai-mail .ai-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* download / default: the arrow drops 2px and holds (0.3s easeInOut) */
+  .ai-download .ai-g { transition: transform .3s cubic-bezier(.42, 0, .58, 1); }
+  :is(.btn, .pc):is(:hover, :focus-visible) .ai-download .ai-g { transform: translateY(2px); }
+
+  /* arrow-right / default: slides 25% right and holds (0.3s easeInOut) */
+  .ai-arrow .ai-g { transition: transform .3s cubic-bezier(.42, 0, .58, 1); }
+  :is(.btn, .pc):is(:hover, :focus-visible) .ai-arrow .ai-g { transform: translateX(6px); }
+
+  /* mail / default: envelope bobs up 1.5px while the flap redraws (0.6s) */
+  :is(.btn, .pc):is(:hover, :focus-visible) .ai-mail .ai-g { animation: ai-bob .6s cubic-bezier(.42, 0, .58, 1); }
+  :is(.btn, .pc):is(:hover, :focus-visible) .ai-mail .ai-draw { animation: ai-draw .6s cubic-bezier(.42, 0, .58, 1); }
+
+  /* linkedin is not in Animate UI's set: same bob as the mail icon */
+  :is(.btn, .pc):is(:hover, :focus-visible) .ai-linkedin .ai-g { animation: ai-bob .6s cubic-bezier(.42, 0, .58, 1); }
+}
+
+@keyframes ai-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+@keyframes ai-draw {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
 }
