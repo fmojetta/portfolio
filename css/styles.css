@@ -152,6 +152,14 @@ body {
   border-radius: 11px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, .5);
 }
+/* logos without their own background sit on a white rounded tile */
+.logo-pop--tile {
+  padding: 7px;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .5);
+}
+.logo-pop--tile img { border-radius: 0; box-shadow: none; }
 .hero__intro a:hover .logo-pop,
 .hero__intro a:focus-visible .logo-pop {
   opacity: 1;
