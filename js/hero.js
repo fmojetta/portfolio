@@ -141,7 +141,7 @@
   function sample(text, fidelity) {
     var cs = getComputedStyle(crisp);
     var size = parseFloat(cs.fontSize);
-    var font = cs.fontWeight + ' ' + (size * SS) + 'px ' + cs.fontFamily;
+    var font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + (size * SS) + 'px ' + cs.fontFamily;
 
     var cRect = canvas.getBoundingClientRect();
     var tRect = crisp.getBoundingClientRect();
@@ -447,7 +447,7 @@
   // wait for the web font so the sampled glyphs are the real letterforms
   var cs = getComputedStyle(crisp);
   if (document.fonts && document.fonts.load) {
-    document.fonts.load(cs.fontWeight + ' 100px ' + cs.fontFamily)
+    document.fonts.load(cs.fontStyle + ' ' + cs.fontWeight + ' 100px ' + cs.fontFamily)
       .then(function () { return document.fonts.ready; })
       .then(boot, boot);
   } else {

@@ -2,26 +2,37 @@
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* ---- palette -------------------------------------------------------
-     One warm-paper base, one deep ink, one indigo accent. Every card
-     colour below is a member of the same warm/desaturated family so the
-     hero, carousel, cards and footer read as one system.               */
-  --paper:       #F4F1EA;   /* page background: warm paper           */
-  --paper-2:     #EFE7D8;   /* recessed surfaces (carousel wells)     */
-  --ink:         #241F1A;   /* primary text                           */
-  --ink-soft:    #6E665C;   /* secondary text                         */
-  --line:        rgba(36, 31, 26, .14);
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
 
-  --accent:      #0000ee;   /* the single accent hue          */
-  --accent-dark: #0000AD;
-  --accent-tint: #E4E5F2;
-  --on-accent:   #FAF6EF;
+  /* ---- palette: dark -------------------------------------------------
+     A warm near-black base with warm off-white text (the same warm family
+     the light version used), and the electric blue accent lifted so it
+     reads on dark: a light blue for text, outlines and particles, and a
+     saturated fill for the primary button.                             */
+  color-scheme: dark;
+  --paper:       #121110;   /* page background                        */
+  --paper-2:     #1D1B18;   /* recessed surfaces (carousel wells)     */
+  --ink:         #F1EDE4;   /* primary text, 16:1                     */
+  --ink-soft:    #A39B8F;   /* secondary text, 6.9:1                  */
+  --line:        rgba(241, 237, 228, .14);
 
-  --card-bg:     #DADCF6;   /* case-study cards: pale wash of the accent */
-  --card-ink:    #0A0A6E;   /* deep indigo, 12:1 on --card-bg */
+  --accent:      #8A8AFF;   /* accent for text, outlines, particles (6.4:1) */
+  --accent-dark: #ADADFF;   /* accent hover on dark = lighter          */
+  --accent-tint: #1E1E40;   /* secondary-button hover fill             */
+  --accent-fill: #3333FF;   /* primary button fill                     */
+  --accent-fill-hover: #4A4AFF;
+  --on-accent:   #FFFFFF;   /* text on the fill, 6.9:1                 */
+
+  --card-bg:     #1E1D3D;   /* case-study cards: deep indigo           */
+  --card-ink:    #E6E6FF;   /* 13:1 on --card-bg                       */
+  --card-line:   rgba(230, 230, 255, .10);
+  --card-media:  #DADCF6;   /* light inset behind the case images, so
+                               their black hand-drawn notes stay legible */
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { height: 100%; }
+
+::selection { background: var(--accent-fill); color: var(--on-accent); }
 
 body {
   min-height: 100%;
@@ -72,6 +83,16 @@ body {
 
 .hero__line,
 .hero__slot { display: block; }
+
+/* the cycling particle phrase: an italic serif against the grotesk lines */
+.hero__slot {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1em;
+  line-height: 1.05;
+  padding-top: .08em;   /* clear the descenders of the line above */
+}
 
 /* The slot is drawn by the particle canvas. The crisp text is the static
    fallback (no JS, or reduced motion); with the canvas running it stays
@@ -126,7 +147,7 @@ body {
 }
 
 .btn--secondary {
-  background: var(--paper);
+  background: transparent;
   color: var(--accent);
 }
 .btn--secondary:hover {
@@ -134,13 +155,14 @@ body {
 }
 
 .btn--primary {
-  background: var(--accent);
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
   color: var(--on-accent);
-  box-shadow: 0 8px 20px rgba(46, 58, 140, .25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .45);
 }
 .btn--primary:hover {
-  background: var(--accent-dark);
-  border-color: var(--accent-dark);
+  background: var(--accent-fill-hover);
+  border-color: var(--accent-fill-hover);
 }
 
 /* compact size, used in the footer */
@@ -153,7 +175,7 @@ body {
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
 .btn:focus-visible {
-  outline: 3px solid rgba(46, 58, 140, .35);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -283,6 +305,7 @@ body {
   align-items: stretch;
   border-radius: var(--pc-radius);
   background: var(--bg);
+  border: 1px solid var(--card-line);
   overflow: hidden;
   text-decoration: none;
   color: var(--ink);
@@ -290,13 +313,16 @@ body {
 }
 .pc:hover {
   transform: translateY(-4px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
 }
 .pc:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 
 .pc__media {
   position: relative;
   min-height: 360px;
+  margin: 14px;
+  border-radius: calc(var(--pc-radius) - 12px);
+  background: var(--card-media);
   overflow: hidden;
 }
 .pc__media img {
@@ -372,6 +398,7 @@ body {
   .plays__grid { grid-template-columns: 1fr; gap: 24px; }
   .pc { grid-column: span 1; grid-template-columns: 1fr; }
   .pc:hover { transform: none; box-shadow: none; }
+  .pc__media { margin: 12px 12px 0; }
   .pc__media { min-height: 0; aspect-ratio: 16 / 10; }
   .pc__body { padding: 24px 24px 28px; }
 }
