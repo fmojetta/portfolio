@@ -17,8 +17,8 @@
   --accent-tint: #E4E5F2;
   --on-accent:   #FAF6EF;
 
-  --card-bg:     #C7D3DE;   /* case-study cards */
-  --card-ink:    #2E4763;
+  --card-bg:     #DADCF6;   /* case-study cards: pale wash of the accent */
+  --card-ink:    #0A0A6E;   /* deep indigo, 12:1 on --card-bg */
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { height: 100%; }
@@ -339,6 +339,7 @@ body {
 }
 .pc__result strong {
   display: block;
+  color: var(--accent);
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(2.25rem, 3.4vw, 3rem);
