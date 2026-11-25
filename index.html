@@ -13,6 +13,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#121110" />
+  <!-- opening animation (js/intro.js): only when motion is allowed and the
+       page opens at the top. A safety timer clears it if the script fails. -->
+  <script>
+    (function () {
+      try {
+        var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (location.hash || (nav && nav.type === 'back_forward')) return;
+        var root = document.documentElement;
+        root.classList.add('intro');
+        setTimeout(function () {
+          if (root.classList.contains('intro')) {
+            root.classList.remove('intro', 'intro-ready');
+            document.dispatchEvent(new Event('introdone'));
+          }
+        }, 4000);
+      } catch (e) {}
+    })();
+  </script>
   <title>Fabio Mojetta</title>
 
   <link rel="icon" type="image/png" sizes="16x16" href="media/16x16.png" />
@@ -209,6 +228,7 @@
   <script src="js/hero.js"></script>
   <script src="js/carousel-curve.js"></script>
   <script src="js/carousel.js"></script>
+  <script src="js/intro.js"></script>
   <script src="js/particle-icons.js"></script>
 </body>
 </html>

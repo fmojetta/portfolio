@@ -171,7 +171,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
   }
 
   // ------------------------------------------------------------- render
-  var W = 0, H = 0, dpr = 1, wallR = 1, thMax = 1;
+  var W = 0, H = 0, dpr = 1, wallR = 1, thMax = 1, angleScale = 1;
   canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
   carousel.style.position = 'relative';
   carousel.appendChild(canvas);
@@ -186,8 +186,8 @@ window.createCarouselCurve = function (carousel, track, opts) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(U.uView, W, H);
     // wall radius such that the screen edge sits at the chosen angle
-    var deg = W < 640 ? CURVE.angleSmall : CURVE.angle;
-    thMax = deg * Math.PI / 180;
+    var deg = (W < 640 ? CURVE.angleSmall : CURVE.angle) * angleScale;
+    thMax = Math.min(deg, 80) * Math.PI / 180;
     wallR = (W / 2) / Math.tan(thMax);
     gl.uniform1f(U.uR, wallR);
     gl.uniform1f(U.uMax, thMax);
@@ -244,5 +244,15 @@ window.createCarouselCurve = function (carousel, track, opts) {
   });
 
   resize();
-  return { render: render, resize: resize };
+  // stronger / weaker curve without touching the canvas (used by the intro)
+  function setAngleScale(k) {
+    angleScale = k;
+    var deg = (W < 640 ? CURVE.angleSmall : CURVE.angle) * angleScale;
+    thMax = Math.min(deg, 80) * Math.PI / 180;
+    wallR = (W / 2) / Math.tan(thMax);
+    gl.uniform1f(U.uR, wallR);
+    gl.uniform1f(U.uMax, thMax);
+  }
+
+  return { render: render, resize: resize, setAngleScale: setAngleScale };
 };

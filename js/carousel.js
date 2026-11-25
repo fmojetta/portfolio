@@ -128,12 +128,21 @@
     angleSmall: 32,   // phones: cards are wide relative to the screen, so the
                       // wall must be wider (smaller angle) to keep them in frame
   };
-  var wallR = 0, thMax = 0;
+  var wallR = 0, thMax = 0, curveScale = 1;
+
+  // the intro morphs the wall from a tight tunnel back to normal
+  function applyCurveScale() {
+    var k = window.introCurve || 1;
+    if (k === curveScale) return;
+    curveScale = k;
+    if (curve && curve.setAngleScale) curve.setAngleScale(k);
+    else sphereSetup();
+  }
 
   function sphereSetup() {
     if (!viewW) return;
-    var deg = viewW < 640 ? SPHERE.angleSmall : SPHERE.angle;
-    thMax = deg * Math.PI / 180;
+    var deg = (viewW < 640 ? SPHERE.angleSmall : SPHERE.angle) * curveScale;
+    thMax = Math.min(deg, 80) * Math.PI / 180;
     wallR = (viewW / 2) / Math.tan(thMax);
     carousel.style.perspective = wallR.toFixed(1) + 'px';
     carousel.style.perspectiveOrigin = '50% 50%';
@@ -197,7 +206,11 @@
     lastT = now;
 
     if (!dragging) {
-      var target = hovering ? HOVER_SPEED : BASE_SPEED;
+      // window.introSpeed / introCurve are set by js/intro.js while the
+      // opening animation plays (1 = normal)
+      var target = (hovering ? HOVER_SPEED : BASE_SPEED) * (window.introSpeed || 1);
+      if ((window.introSpeed || 1) > 1) speed = target;   // follow the intro exactly
+      applyCurveScale();
       speed += (target - speed) * Math.min(1, EASE * dt);
 
       // leftover throw momentum bleeds off, then plain auto-scroll takes over

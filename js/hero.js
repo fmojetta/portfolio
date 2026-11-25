@@ -586,6 +586,12 @@
   });
 
   function boot() {
+    // while the opening animation plays (js/intro.js), wait for it so the
+    // particles fly in as the hero appears
+    if (document.documentElement.classList.contains('intro')) {
+      document.addEventListener('introdone', boot, { once: true });
+      return;
+    }
     hero.classList.add('hero--canvas');   // hides the static fallback text
     resize();
     dotR = dotTarget;
