@@ -21,13 +21,13 @@
   if (!showcase || !hero) { finish(); return; }
 
   var T = {
-    hold: 420,          // ms spinning fast, fully zoomed, before it moves
-    move: 1050,         // ms: zoom-out + glide + slow-down
+    hold: 400,          // ms spinning fast, fully zoomed, before it moves
+    move: 1800,         // ms: zoom-out + glide + slow-down
     reveal: 0.55,       // fraction of `move` at which the hero starts appearing
     zoom: 2.3,          // starting scale
-    spin: 16,           // starting speed multiplier
-    curve: 1.75,        // starting curve multiplier (tunnel)
-    blur: 7,            // starting motion blur (px)
+    spin: 20,           // starting speed multiplier
+    curve: 1.5,        // starting curve multiplier (tunnel)
+    blur: 0,            // starting motion blur (px)
   };
 
   // where the carousel has to move to sit in the middle of the screen
