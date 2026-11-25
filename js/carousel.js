@@ -117,33 +117,46 @@
   // centre of the strip is farthest away, and towards the screen edges the
   // wall curves in -- items swing to face you, come closer and stretch
   // (barrel distortion), then dissolve into the edge mask.
+  // CSS version of the curved wall (phones/tablets, or when WebGL isn't
+  // available): each card is placed on the inside of a cylinder around the
+  // viewer with real 3D perspective -- the same geometry the WebGL renderer
+  // uses. The viewer sits at the cylinder's centre (perspective = radius), so
+  // a card at angle th is drawn at x = R*tan(th): flat in the middle,
+  // swinging in and growing towards the edges.
   var SPHERE = {
-    angle: 42,        // max rotateY (deg) at the screen edges
-    depth: 140,       // how far edge items come toward the viewer (px)
-    stretch: 0.22,    // extra height at the edges (barrel bulge)
-    squash: 0.06,     // slight horizontal squeeze at the edges
-    perspective: 900, // px
+    angle: 44,        // how far round the wall you see at the screen edge (deg)
+    angleSmall: 32,   // phones: cards are wide relative to the screen, so the
+                      // wall must be wider (smaller angle) to keep them in frame
   };
+  var wallR = 0, thMax = 0;
+
+  function sphereSetup() {
+    if (!viewW) return;
+    var deg = viewW < 640 ? SPHERE.angleSmall : SPHERE.angle;
+    thMax = deg * Math.PI / 180;
+    wallR = (viewW / 2) / Math.tan(thMax);
+    carousel.style.perspective = wallR.toFixed(1) + 'px';
+    carousel.style.perspectiveOrigin = '50% 50%';
+    track.style.transformStyle = 'preserve-3d';
+  }
 
   function sphere() {
     if (!viewW) return;
-    var half = viewW / 2;
-    var mobile = viewW < 640;
-    var A = mobile ? SPHERE.angle * 0.7 : SPHERE.angle;
-    var D = mobile ? SPHERE.depth * 0.6 : SPHERE.depth;
+    if (!wallR) sphereSetup();
+    var half = viewW / 2, R = wallR, lim = Math.min(1.45, thMax * 1.6);
     var kids = track.children;
     for (var i = 0; i < kids.length; i++) {
-      var u = (centers[i] + offset - half) / half;      // -1 left edge, +1 right edge
-      if (u < -1.6 || u > 1.6) continue;                 // off screen: leave as is
-      var a = Math.max(-1.4, Math.min(1.4, u));
-      var e = a * a;                                     // 0 centre -> 1 edges
+      var sx = centers[i] + offset - half;               // distance along the wall
+      var th = sx / R;
+      if (th < -lim - 0.6 || th > lim + 0.6) continue;   // well off screen
+      th = Math.max(-lim, Math.min(lim, th));
       kids[i].style.transform =
-        'perspective(' + SPHERE.perspective + 'px)' +
-        ' translateZ(' + (e * D).toFixed(1) + 'px)' +
-        ' rotateY(' + (-a * A).toFixed(2) + 'deg)' +
-        ' scale(' + (1 - e * SPHERE.squash).toFixed(3) + ',' + (1 + e * SPHERE.stretch).toFixed(3) + ')';
+        'translate3d(' + (R * Math.sin(th) - sx).toFixed(1) + 'px,0,' +
+        (R * (1 - Math.cos(th))).toFixed(1) + 'px)' +
+        ' rotateY(' + (-th).toFixed(4) + 'rad)';
     }
   }
+
 
   function build() {
     var h = itemHeight();
@@ -290,6 +303,7 @@
       }
       measure();
       wrap();
+      sphereSetup();
       if (curve) { readBox(); curve.resize(); }
     }, 150);
   });

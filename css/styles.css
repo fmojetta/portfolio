@@ -338,7 +338,7 @@ body {
 }
 
 @media (max-width: 640px) {
-  .showcase { --item-height: 220px; --gap: 16px; --radius: 22px; padding: 3rem 0; }
+  .showcase { --item-height: 170px; --gap: 14px; --radius: 18px; padding: 3rem 0; }
 }
 
 
