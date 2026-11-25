@@ -148,49 +148,59 @@ body {
   .ext-arrow .ai-g { transition: none; }
 }
 
-/* product logo that pops up above the link on hover / keyboard focus */
+/* product logo that pops up above the link on hover / keyboard focus:
+   it springs in bigger and tilted, then keeps floating gently */
 .hero__intro a { position: relative; }
 .logo-pop {
+  --tilt: -8deg;
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 10px);
-  width: 44px;
-  height: 44px;
+  bottom: calc(100% + 12px);
+  width: 64px;
+  height: 64px;
   pointer-events: none;
   opacity: 0;
   filter: blur(4px);
-  transform: translate(-50%, 10px) scale(.6) rotate(-10deg);
+  transform: translate(-50%, 12px) scale(.55) rotate(0deg);
   transform-origin: 50% 100%;
   transition:
     opacity .22s ease,
     filter .3s ease,
-    transform .45s cubic-bezier(.34, 1.56, .64, 1);   /* slight overshoot */
+    transform .5s cubic-bezier(.34, 1.56, .64, 1);   /* slight overshoot */
 }
+.logo-pop--tile { --tilt: 7deg; }
 .logo-pop img {
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: 11px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, .5);
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .5);
 }
 /* logos without their own background sit on a white rounded tile */
 .logo-pop--tile {
-  padding: 7px;
+  padding: 10px;
   background: #fff;
-  border-radius: 11px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, .5);
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .5);
 }
 .logo-pop--tile img { border-radius: 0; box-shadow: none; }
+
 .hero__intro a:hover .logo-pop,
 .hero__intro a:focus-visible .logo-pop {
   opacity: 1;
   filter: none;
-  transform: translate(-50%, 0) scale(1) rotate(0);
+  transform: translate(-50%, 0) scale(1) rotate(var(--tilt));
+  animation: logo-float 3.2s ease-in-out .5s infinite;   /* starts once it has landed */
+}
+/* continuous, subtle float: a small bob with a slight sway */
+@keyframes logo-float {
+  0%, 100% { translate: 0 0;    rotate: 0deg; }
+  50%      { translate: 0 -5px; rotate: 2.5deg; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .logo-pop { transform: translate(-50%, 0); filter: none; transition: opacity .2s ease; }
+  .logo-pop { transform: translate(-50%, 0) rotate(var(--tilt)); filter: none; transition: opacity .2s ease; }
   .hero__intro a:hover .logo-pop,
-  .hero__intro a:focus-visible .logo-pop { transform: translate(-50%, 0); }
+  .hero__intro a:focus-visible .logo-pop { transform: translate(-50%, 0) rotate(var(--tilt)); animation: none; }
 }
 .hero__intro a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
