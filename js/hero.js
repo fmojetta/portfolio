@@ -1,4 +1,4 @@
-// Hero: "I love making things [look right → work in code → ship faster with AI]"
+// Hero: "I'm curious about how things work and [four rotating phrases]"
 //
 // The headline is real, static HTML. Its last line (the "slot") is drawn by a
 // 2D canvas particle field that walks through the design process: each stage
@@ -250,11 +250,16 @@
              'M50 30 C55 30 57 34 57 37 C57 42 53 44 50 44 C46 44 43 41 43 37 C43 33 46 30 50 30',
              'M38 58 L24 80 L39 75', 'M62 58 L76 80 L61 75',
              'M44 78 C45 87 50 95 50 95 C50 95 55 87 56 78'],
+    trend: ['M8 82 C22 70 32 76 44 60 C54 47 64 52 90 18', 'M70 16 L90 18 L88 38'],
+    bulb: ['M50 8 C70 8 81 24 79 41 C77 55 65 61 63 72 L37 72 C35 61 23 55 21 41 C19 24 30 8 50 8',
+           'M39 81 L61 81', 'M43 90 L57 90', 'M44 72 C44 60 47 52 50 46 C53 52 56 60 56 72'],
     sparkles: ['M38 10 C40 30 46 37 68 40 C46 44 40 51 38 72 C36 51 30 44 8 40 C30 37 36 30 38 10',
                'M76 56 C77 67 80 71 92 72 C80 74 77 77 76 90 C75 77 72 74 60 72 C72 71 75 67 76 56'],
   };
   // [left doodle, right doodle] for each phrase, in order
-  var DOODLE_SETS = [['eye', 'sparkle'], ['code', 'braces'], ['rocket', 'sparkles']];
+  // one pair per phrase: better / build differently / ideas -> reality /
+  // possible with technology
+  var DOODLE_SETS = [['trend', 'sparkle'], ['code', 'braces'], ['bulb', 'eye'], ['rocket', 'sparkles']];
 
   var doff = document.createElement('canvas');
   var dctx = doff.getContext('2d', { willReadFrequently: true });

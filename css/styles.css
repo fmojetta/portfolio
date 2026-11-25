@@ -79,9 +79,10 @@ body {
 .hero__title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.9rem, 8vw, 5.25rem);
+  font-size: clamp(1.75rem, 5vw, 4.25rem);
   line-height: 1.08;
   color: var(--ink);
+  text-wrap: balance;
 }
 
 .hero__line,
@@ -92,9 +93,11 @@ body {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
-  font-size: 1.1em;
-  line-height: 1.05;
-  padding-top: .08em;   /* clear the descenders of the line above */
+  /* the phrases are long and must stay on one line (they're particles), so
+     the size is capped by the viewport width on small screens */
+  font-size: min(1.02em, 6.9vw);
+  line-height: 1.15;
+  padding-top: .12em;   /* clear the descenders of the line above */
 }
 
 /* The slot is drawn by the particle canvas. The crisp text is the static
@@ -118,6 +121,7 @@ body {
    links opt back in) */
 .hero__intro a {
   pointer-events: auto;
+  white-space: nowrap;   /* keep the name and its arrow together */
   color: var(--ink);
   text-decoration: underline;
   text-decoration-color: var(--accent);
