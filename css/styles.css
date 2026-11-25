@@ -418,8 +418,43 @@ body {
 }
 .pc:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 
-/* side projects follow straight on from the case studies */
+/* side projects follow straight on from the case studies, and read as
+   secondary: half-width cards in a quiet neutral surface, image on top,
+   smaller type, and an outline button instead of the blue one */
 .plays--side { padding-top: 0; }
+.plays--side .plays__head { margin-bottom: 2rem; }
+.plays--side .plays__head h2 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+.plays--side .pc {
+  --bg: var(--paper-2);
+  --ink: var(--ink);
+  grid-column: span 6;
+  grid-template-columns: 1fr;
+  border-color: var(--line);
+}
+.plays--side .pc:hover { border-color: rgba(241, 237, 228, .28); }
+.plays--side .pc__media {
+  min-height: 0;
+  aspect-ratio: 16 / 10;
+  margin: 12px 12px 0;
+  background: #26231F;
+}
+.plays--side .pc__body { padding: 22px 24px 26px; }
+.plays--side .pc__title { font-size: clamp(1.15rem, 1.6vw, 1.4rem); }
+.plays--side .pc__meta,
+.plays--side .pc__result { color: var(--ink-soft); }
+.plays--side .pc__result { margin-top: .9rem; font-size: .98rem; }
+.plays--side .pc__btn {
+  margin-top: 1.4rem;
+  padding: 10px 18px;
+  font-size: .92rem;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.plays--side .pc:hover .pc__btn { background: transparent; border-color: var(--ink); }
+@media (max-width: 860px) {
+  .plays--side .pc { grid-column: span 1; }
+}
 
 .pc__media {
   position: relative;
