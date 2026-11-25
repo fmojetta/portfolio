@@ -256,6 +256,17 @@ body {
   border-color: var(--accent-fill-hover);
 }
 
+/* quiet black & white outline, used in the footer */
+.btn--mono {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.btn--mono:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 /* compact size, used in the footer */
 .btn--sm {
   font-size: 1.05rem;
@@ -513,6 +524,22 @@ body {
   line-height: 1.05;
   color: var(--ink);
 }
+/* "Let's talk" flanked by two particle icons (js/particle-icons.js) */
+.footer__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(.75rem, 3vw, 2.5rem);
+}
+.p-icon {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(56px, 8vw, 112px);
+  aspect-ratio: 1;
+}
+.p-icon--left  { transform: rotate(-8deg); }
+.p-icon--right { transform: rotate(7deg); }
+
 .footer__lead {
   margin: 1.25rem auto 0;
   max-width: 44ch;
