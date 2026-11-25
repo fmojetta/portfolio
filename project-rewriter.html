@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZJH3J19LY2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZJH3J19LY2');
+</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121110" />
+  <title>Rewriter — Side Project</title>
+
+  <link rel="icon" type="image/png" sizes="16x16" href="media/16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="media/32x32.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <nav class="project__nav">
+    <a class="project__back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5" />
+        <path d="M11 18l-6-6 6-6" />
+      </svg>
+      Back to home
+    </a>
+  </nav>
+
+  <main class="project">
+
+    <header class="project__header">
+      <h1>Rewriter</h1>
+      <p class="project__meta">Side project · macOS menu-bar app · August 2026</p>
+    </header>
+
+    <section class="project__tldr">
+      <h2>TL;DR</h2>
+      <p>I no longer had Grammarly, and I missed its rewrite feature. So I built (with Claude) a small macOS menu-bar app that rewrites any selected text, in any app, with one shortcut: ⌥⌘R. Pick a mode or write your own prompt, preview the result, then accept, edit or regenerate it. It runs on a small open-weight model on my own laptop, so nothing leaves the machine.</p>
+    </section>
+
+    <section class="project__video project__video--full">
+      <video src="media/rewriter.mp4" poster="media/rewriter-poster.jpg" width="1651" height="1080" autoplay loop muted playsinline></video>
+    </section>
+
+    <section class="project__section">
+      <h2>The itch</h2>
+      <p>Most of what I write during the day goes into Slack, email, docs and Figma comments, often in my second language. A quick &ldquo;make this clearer&rdquo; or &ldquo;make this more formal&rdquo; pass right where I&rsquo;m typing was the Grammarly feature I actually used. Copying text into a chat window and back breaks the flow, so I wanted the rewrite to come to the text, not the other way round.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>How it works</h2>
+      <ul>
+        <li>Select text anywhere and press ⌥⌘R.</li>
+        <li>A floating preview shows the rewrite in the chosen mode: improve clarity, fix grammar only, more formal, more concise, more friendly, translate Italian ↔ English, or a custom prompt.</li>
+        <li>Accept to paste it back in place, tweak the text first, switch mode, or regenerate.</li>
+        <li>The clipboard is saved and restored around every rewrite, so whatever you had copied is still there afterwards.</li>
+        <li>Every mode&rsquo;s prompt can be edited in Settings, which is where most of the tuning happened.</li>
+      </ul>
+    </section>
+
+    <section class="project__section">
+      <h2>Why a small local model</h2>
+      <p>It talks to a local <a href="https://ollama.com" target="_blank" rel="noopener noreferrer">Ollama</a> server (qwen2.5 7B by default), or to any OpenAI-compatible endpoint if I want something bigger. A 7B model won&rsquo;t match the large hosted ones on style, but for rewording a Slack message it&rsquo;s fast, private and free to run. Reasoning models get their hidden &ldquo;thinking&rdquo; switched off automatically, which turns a minute-long wait back into a couple of seconds.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>What I learned</h2>
+      <p>This was my hands-on way into local LLM tooling, and it paid off. The hard parts weren&rsquo;t the model. They were the small details that make a tool feel trustworthy: not clobbering the clipboard, returning focus to the right app, explaining clearly why macOS needs Accessibility access, and treating a slow or empty model reply as an error instead of something that could get pasted. A small model with tight prompts goes a long way.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Where it stands</h2>
+      <p>I use it every day. I shared a short demo with colleagues, and it got people curious about trying small local models themselves. That was half the point.</p>
+    </section>
+
+
+    <div class="project__footer-cta">
+      <a class="project__back" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5" />
+          <path d="M11 18l-6-6 6-6" />
+        </svg>
+        Back to home
+      </a>
+    </div>
+
+  </main>
+
+</body>
+</html>

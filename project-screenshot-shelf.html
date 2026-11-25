@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZJH3J19LY2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZJH3J19LY2');
+</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121110" />
+  <title>Screenshot Shelf — Side Project</title>
+
+  <link rel="icon" type="image/png" sizes="16x16" href="media/16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="media/32x32.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <nav class="project__nav">
+    <a class="project__back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5" />
+        <path d="M11 18l-6-6 6-6" />
+      </svg>
+      Back to home
+    </a>
+  </nav>
+
+  <main class="project">
+
+    <header class="project__header">
+      <h1>Screenshot Shelf</h1>
+      <p class="project__meta">Side project · macOS menu-bar app · September 2026</p>
+    </header>
+
+    <section class="project__tldr">
+      <h2>TL;DR</h2>
+      <p>I take screenshots straight to the clipboard all day, and each new one wipes out the last. So I built a tiny menu-bar app that quietly keeps every clipboard screenshot on a shelf. Open it from the camera icon to copy any of them again, preview them with the space bar, or drag one or several straight into Miro, Figma, Slack or a folder.</p>
+    </section>
+
+    <section class="project__video project__video--full">
+      <video src="media/screenshot-shelf.mp4" poster="media/screenshot-shelf-poster.jpg" width="1670" height="1080" autoplay loop muted playsinline></video>
+    </section>
+
+    <section class="project__section">
+      <h2>The itch</h2>
+      <p>⌘⌃⇧4 is the fastest way to grab part of the screen: no file on the desktop, just paste it where it&rsquo;s needed. The catch is that the clipboard only holds one thing. During competitor research or a design review I&rsquo;d capture three or four screens in a row, then realise only the last one was still there. Saving to files instead means a cluttered desktop and a trip to Finder every time.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>How it works</h2>
+      <ul>
+        <li>It watches the clipboard in the background. When something that looks like a screenshot lands there (image data only, no file, link or text with it), it saves a copy to the shelf.</li>
+        <li>Images copied from a browser or another app bring extra data along, so they&rsquo;re left alone and the shelf stays screenshots only.</li>
+        <li>Click a thumbnail to copy it again. ⌘-click or shift-click to pick several, then drag them all at once into any app.</li>
+        <li>Arrow keys move around the grid and holding space opens a Quick Look preview, just like in Finder.</li>
+        <li>Right-click to show in Finder or delete, plus Clear, Open Folder and Launch at login in the footer.</li>
+      </ul>
+    </section>
+
+    <section class="project__section">
+      <h2>Small on purpose</h2>
+      <p>The whole app is a single Swift file of about 650 lines (SwiftUI for the panel, a bit of AppKit where SwiftUI falls short), built by a short shell script with no Xcode project. Dragging several screenshots at once is a good example: SwiftUI&rsquo;s drag modifier carries only one item, so each thumbnail has a thin AppKit layer on top that starts the drag itself and stacks the files into a pile. Details like that, plus keeping the panel open while a drag is in flight or while the preview has focus, are what make it feel native rather than bolted on.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>Where it stands</h2>
+      <p>It launches at login and I use it every day. It has quietly replaced the screenshots folder on my desktop. A build script packages it into a drag-to-install disk image, so it&rsquo;s easy to share with anyone who wants it.</p>
+    </section>
+
+
+    <div class="project__footer-cta">
+      <a class="project__back" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5" />
+          <path d="M11 18l-6-6 6-6" />
+        </svg>
+        Back to home
+      </a>
+    </div>
+
+  </main>
+
+</body>
+</html>

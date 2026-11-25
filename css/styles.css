@@ -407,6 +407,9 @@ body {
 }
 .pc:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 
+/* side projects follow straight on from the case studies */
+.plays--side { padding-top: 0; }
+
 .pc__media {
   position: relative;
   min-height: 360px;
@@ -631,6 +634,20 @@ body {
   max-width: 62ch;   /* ~70 characters per line in this face */
   text-wrap: pretty;
 }
+
+.project__section a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: .2em;
+  transition: color .18s ease;
+}
+.project__section a:hover,
+.project__section a:focus-visible { color: var(--accent-dark); }
+
+/* screen recording: show the whole frame (menu bar included), no crop */
+.project__video--full video { height: auto; }   /* ratio comes from the width/height attributes */
 
 .project__stats {
   display: grid;
