@@ -21,6 +21,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
     angleSmall: 34,    // the same on narrow screens
     fadeStart: 0.86,   // fraction of that angle where items start dissolving
     segments: 48,      // columns per item -> smoothness of the curve
+    rows: 10,          // rows per item -> keeps lines inside the images straight
     maxDpr: 1.5,
   };
 
@@ -98,10 +99,16 @@ window.createCarouselCurve = function (carousel, track, opts) {
    'uBlank', 'uSize', 'uRadius'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
 
   // one subdivided strip (N columns x 1 row) shared by every item
-  var N = CURVE.segments, verts = [];
+  // grid of N columns x M rows: the rows keep straight lines inside the
+  // images straight (one tall row per column showed a sawtooth from affine
+  // texture interpolation across the bent quads)
+  var N = CURVE.segments, M = CURVE.rows, verts = [];
   for (var i = 0; i < N; i++) {
     var x0 = i / N, x1 = (i + 1) / N;
-    verts.push(x0, 0, x1, 0, x0, 1,  x0, 1, x1, 0, x1, 1);
+    for (var j = 0; j < M; j++) {
+      var y0 = j / M, y1 = (j + 1) / M;
+      verts.push(x0, y0, x1, y0, x0, y1,  x0, y1, x1, y0, x1, y1);
+    }
   }
   var buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
