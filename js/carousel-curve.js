@@ -20,19 +20,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
                        // (44deg -> +39%)
     angleSmall: 34,    // the same on narrow screens
     fadeStart: 0.86,   // fraction of that angle where items start dissolving
-
-    // glass at the edges: the outer bands of the wall look like thick curved
-    // glass -- content is refracted (shifted and magnified), the colour
-    // channels split into a thin rainbow fringe, and a soft light catches
-    // the rim. All in screen space (0 = centre, 1 = screen edge).
-    glassStart: 0.7,   // where the glass band begins
-    refract: 0.07,     // how far content is displaced at the very edge (uv)
-    magnify: 0.0,      // vertical magnification at the edge (0 = off)
-    aberration: 0.55,  // colour fringe strength (relative split of channels)
-    rim: 0.10,         // brightness of the soft light line where the glass begins
-    sheen: 0.06,       // brightness of the wider soft sheen inside the band
     segments: 48,      // columns per item -> smoothness of the curve
-    rows: 10,          // rows per item -> keeps lines inside the images straight
     maxDpr: 1.5,
   };
 
@@ -51,7 +39,6 @@ window.createCarouselCurve = function (carousel, track, opts) {
     'varying vec2 vLocal;',
     'varying vec2 vUv;',
     'varying float vAlpha;',
-    'varying float vU;',             // screen position, -1 left edge .. 1 right edge
     'void main() {',
     '  vec2 p = uRect.xy + a * uRect.zw;',
     '  vec2 c = uView * 0.5;',
@@ -59,7 +46,6 @@ window.createCarouselCurve = function (carousel, track, opts) {
     '  p.x = c.x + uR * tan(th);',
     '  p.y = c.y + (p.y - c.y) / cos(th);',
     '  vAlpha = 1.0 - smoothstep(uFade, 1.0, abs(th) / uMax);',
-    '  vU = (p.x - c.x) / c.x;',
     '  vUv = a;',
     '  vLocal = a * uRect.zw;',
     '  vec2 ndc = p / uView * 2.0 - 1.0;',
@@ -74,40 +60,18 @@ window.createCarouselCurve = function (carousel, track, opts) {
     'uniform vec3 uBlank;',
     'uniform vec2 uSize;',          // item size, CSS px
     'uniform float uRadius;',
-    'uniform float uGlass, uRefract, uMag, uCA, uRim, uSheen;',
     'varying vec2 vUv;',
     'varying vec2 vLocal;',
     'varying float vAlpha;',
-    'varying float vU;',
     'void main() {',
     // rounded-rectangle mask in item space
     '  vec2 h = uSize * 0.5;',
     '  vec2 q = abs(vLocal - h) - (h - vec2(uRadius));',
     '  float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRadius;',
     '  float m = 1.0 - smoothstep(-0.75, 0.75, d);',
-    // glass band: 0 in the middle of the screen, rising to 1 at the edge
-    '  float au = abs(vU);',
-    '  float g = smoothstep(uGlass, 1.0, au);',
-    '  float k = g * g;',
-    '  float dir = sign(vU);',
-    // refraction: pull content outward (as through a thick convex rim) and
-    // magnify it a little vertically
-    '  vec2 uv = vUv;',
-    '  uv.y = 0.5 + (uv.y - 0.5) * (1.0 - k * uMag);',
-    '  float dx = -dir * k * uRefract;',
-    // chromatic aberration: each channel refracts by a slightly different amount
-    '  vec3 col;',
-    '  if (uReady > 0.5) {',
-    '    col.r = texture2D(uTex, clamp(uv + vec2(dx * (1.0 + uCA), 0.0), 0.0, 1.0)).r;',
-    '    col.g = texture2D(uTex, clamp(uv + vec2(dx, 0.0), 0.0, 1.0)).g;',
-    '    col.b = texture2D(uTex, clamp(uv + vec2(dx * (1.0 - uCA), 0.0), 0.0, 1.0)).b;',
-    '  } else { col = uBlank; }',
-    // light: a crisp rim where the glass begins plus a soft sheen inside it
-    '  float rim = exp(-pow((au - uGlass) / 0.02, 2.0)) * uRim;',
-    '  float sheen = exp(-pow((au - (uGlass + 1.0) * 0.5) / 0.06, 2.0)) * uSheen;',
-    '  col = col + vec3(rim + sheen);',
+    '  vec3 col = uReady > 0.5 ? texture2D(uTex, vUv).rgb : uBlank;',
     '  float a = m * vAlpha;',
-    '  gl_FragColor = vec4(min(col, 1.0) * a, a);',
+    '  gl_FragColor = vec4(col * a, a);',
     '}'
   ].join('\n');
 
@@ -131,20 +95,13 @@ window.createCarouselCurve = function (carousel, track, opts) {
   gl.useProgram(prog);
   var U = {};
   ['uRect', 'uView', 'uR', 'uMax', 'uFade', 'uTex', 'uReady',
-   'uBlank', 'uSize', 'uRadius', 'uGlass', 'uRefract', 'uMag', 'uCA', 'uRim',
-   'uSheen'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+   'uBlank', 'uSize', 'uRadius'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
 
   // one subdivided strip (N columns x 1 row) shared by every item
-  // grid of N columns x M rows: the rows keep straight lines inside the
-  // images straight (one tall row per column showed a sawtooth from affine
-  // texture interpolation across the bent quads)
-  var N = CURVE.segments, M = CURVE.rows, verts = [];
+  var N = CURVE.segments, verts = [];
   for (var i = 0; i < N; i++) {
     var x0 = i / N, x1 = (i + 1) / N;
-    for (var j = 0; j < M; j++) {
-      var y0 = j / M, y1 = (j + 1) / M;
-      verts.push(x0, y0, x1, y0, x0, y1,  x0, y1, x1, y0, x1, y1);
-    }
+    verts.push(x0, 0, x1, 0, x0, 1,  x0, 1, x1, 0, x1, 1);
   }
   var buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -159,12 +116,6 @@ window.createCarouselCurve = function (carousel, track, opts) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   gl.uniform1i(U.uTex, 0);
   gl.uniform1f(U.uFade, CURVE.fadeStart);
-  gl.uniform1f(U.uGlass, CURVE.glassStart);
-  gl.uniform1f(U.uRefract, CURVE.refract);
-  gl.uniform1f(U.uMag, CURVE.magnify);
-  gl.uniform1f(U.uCA, CURVE.aberration);
-  gl.uniform1f(U.uRim, CURVE.rim);
-  gl.uniform1f(U.uSheen, CURVE.sheen);
   var blank = (getComputedStyle(document.documentElement).getPropertyValue('--paper-2').trim() || '#1D1B18');
   var bc = parseInt(blank.replace('#', ''), 16);
   gl.uniform3f(U.uBlank, (bc >> 16 & 255) / 255, (bc >> 8 & 255) / 255, (bc & 255) / 255);
