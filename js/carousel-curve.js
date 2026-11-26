@@ -15,7 +15,7 @@ window.createCarouselCurve = function (carousel, track, opts) {
   'use strict';
 
   var CURVE = {
-    angle: 44,         // how far round the wall you see at the screen edge (deg).
+    angle: 40,         // how far round the wall you see at the screen edge (deg).
                        // Higher = stronger curve; the edge is 1/cos(angle) taller
                        // (44deg -> +39%)
     angleSmall: 34,    // the same on narrow screens

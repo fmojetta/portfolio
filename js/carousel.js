@@ -8,9 +8,9 @@
 
   // Aspect ratios drive the width; every item keeps the same height.
   var MEDIA = [
-    { type: 'video', src: 'media/video1.mp4', poster: 'media/video1-poster.jpg', ratio: 3 / 2 },
+    { type: 'video', src: 'media/video1.mp4', poster: 'media/video1-poster.jpg', ratio: 1 },
     { type: 'video', src: 'media/video3.mp4', poster: 'media/video3-poster.jpg', ratio: 1 },
-    { type: 'video', src: 'media/video2.mp4', poster: 'media/video2-poster.jpg', ratio: 3 / 2 },
+    { type: 'video', src: 'media/video2.mp4', poster: 'media/video2-poster.jpg', ratio: 1 },
     { type: 'image', src: 'media/image1-700.jpg',  ratio: 1 },
     /*{ type: 'image', src: 'https://picsum.photos/id/1057/1200/800', ratio: 3 / 2 },
     { type: 'image', src: 'https://picsum.photos/id/1069/900/1200', ratio: 3 / 4 },
