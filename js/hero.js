@@ -587,7 +587,7 @@
 
   function boot() {
     // while the opening animation plays (js/intro.js), wait for it so the
-    // particles fly in as the hero appears
+    // particles appear as the hero does
     if (document.documentElement.classList.contains('intro')) {
       document.addEventListener('introdone', boot, { once: true });
       return;
@@ -595,10 +595,10 @@
     hero.classList.add('hero--canvas');   // hides the static fallback text
     resize();
     dotR = dotTarget;
-    // the first sentence flies in from across the hero
+    // the first sentence starts already formed (it fades in via CSS)
     for (var i = 0; i < count; i++) {
-      px[i] = Math.random() * W;
-      py[i] = Math.random() * H;
+      px[i] = hx[i];
+      py[i] = hy[i];
     }
     booted = true;
     if (inView && !document.hidden) start();

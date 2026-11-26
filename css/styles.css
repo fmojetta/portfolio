@@ -63,6 +63,9 @@ body {
   height: 100%;
   display: block;
 }
+/* particles fade in, already formed, once the canvas takes over */
+.hero:not(.hero--canvas) #scene { opacity: 0; }
+#scene { transition: opacity .6s ease; }
 
 /* Text layer above the particles. It ignores the pointer (so the cursor keeps
    playing with the particles underneath); only the buttons capture clicks. */
