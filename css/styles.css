@@ -224,7 +224,7 @@ body {
   align-items: center;
   gap: 0.6em;
   padding: 0.85em 1.6em;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 2px solid var(--accent);
   font-size: clamp(1.1rem, 1rem + .6vw, 1.5rem);   /* ~1.15rem on phones, 1.5rem on desktop */
   font-weight: 400;
@@ -528,7 +528,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
   padding: 14px 26px;
-  border-radius: 999px;
+  border-radius: 8px;
   transition: background-color .18s ease;
 }
 .pc:hover .pc__btn { background: var(--accent-fill-hover); }
@@ -661,26 +661,35 @@ body {
   .project__video img { height: 42vh; }
 }
 
-.project__tldr {
-  background: var(--paper-2);
-  border-radius: 20px;
-  padding: 2rem;
+/* at-a-glance recap: role, duration, team, tools… */
+.project__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
   margin-bottom: 3rem;
 }
-.project__tldr h2 {
+.project__facts > div {
+  padding: 1rem 1.5rem 1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.project__facts dt {
   font-family: var(--font-display);
-  font-size: .8rem;
+  font-size: .75rem;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--accent-dark);
   font-weight: 700;
-  margin-bottom: .75rem;
+  color: var(--accent-dark);
+  margin-bottom: .35rem;
 }
-.project__tldr p {
-  text-wrap: pretty;
-  font-size: 1.15rem;
-  line-height: 1.6;
+.project__facts dd {
+  font-size: .98rem;
+  line-height: 1.5;
   color: var(--ink);
+  text-wrap: pretty;
+}
+@media (max-width: 640px) {
+  .project__facts { grid-template-columns: 1fr; }
+  .project__facts > div { padding-right: 0; }
 }
 
 .project__section { margin-bottom: 3rem; }
@@ -700,6 +709,9 @@ body {
   text-wrap: pretty;
 }
 
+.project__section p + p,
+.project__section ul + p { margin-top: 1rem; }
+
 .project__section a {
   color: var(--ink);
   text-decoration: underline;
@@ -712,7 +724,8 @@ body {
 .project__section a:focus-visible { color: var(--accent-dark); }
 
 /* screen recording: show the whole frame (menu bar included), no crop */
-.project__video--full video { height: auto; }   /* ratio comes from the width/height attributes */
+.project__video--full video,
+.project__video--full img { height: auto; }   /* ratio comes from the width/height attributes */
 
 .project__stats {
   display: grid;
@@ -795,10 +808,6 @@ body {
   /* download / default: the arrow drops 2px and holds (0.3s easeInOut) */
   .ai-download .ai-g { transition: transform .3s cubic-bezier(.42, 0, .58, 1); }
   :is(.btn, .pc):is(:hover, :focus-visible) .ai-download .ai-g { transform: translateY(2px); }
-
-  /* arrow-right / default: slides 25% right and holds (0.3s easeInOut) */
-  .ai-arrow .ai-g { transition: transform .3s cubic-bezier(.42, 0, .58, 1); }
-  :is(.btn, .pc):is(:hover, :focus-visible) .ai-arrow .ai-g { transform: translateX(6px); }
 
   /* mail / default: envelope bobs up 1.5px while the flap redraws (0.6s) */
   :is(.btn, .pc):is(:hover, :focus-visible) .ai-mail .ai-g { animation: ai-bob .6s cubic-bezier(.42, 0, .58, 1); }

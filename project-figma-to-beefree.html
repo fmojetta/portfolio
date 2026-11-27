@@ -13,7 +13,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#121110" />
-  <title>Figma to Beefree JSON — Case Study</title>
+  <title>Figma to RGE Studio — Case Study</title>
 
   <link rel="icon" type="image/png" sizes="16x16" href="media/16x16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="media/32x32.png" />
@@ -40,17 +40,20 @@
   <main class="project">
 
     <header class="project__header">
-      <h1>Figma to Beefree JSON</h1>
-      <p class="project__meta">Product Designer · Beefree SDK · April–May 2026</p>
+      <h1>Figma to RGE Studio</h1>
+      <p class="project__meta">Product Designer · RGE Studio (Beefree) · 2026</p>
     </header>
 
-    <section class="project__tldr">
-      <h2>TL;DR</h2>
-      <p>Designers mock up email templates in Figma, but there's no bridge from that canvas into our email builder. Every layout gets rebuilt by hand, and small details drift in the handoff. So I built a Figma plugin that lets you compose an email visually on Figma then export it straight into Beefree's JSON schema. A one-click flow convert, enrich, log in, and import the finished template directly into RGE Studio, Beefree's email builder product, without ever leaving Figma. A companion Claude Code skill closes the other gap — it takes any existing Figma frame, not just ones built with the plugin, and restructures it into something the plugin can export.</p>
-    </section>
+    <dl class="project__facts">
+      <div><dt>My role</dt><dd>Product Designer: concept, UX/UI, building the plugin with Claude Code</dd></div>
+      <div><dt>Duration</dt><dd>3 days, during a hackathon</dd></div>
+      <div><dt>Team</dt><dd>1 frontend and 1 backend developer</dd></div>
+      <div><dt>Tools</dt><dd>Figma, Claude Code</dd></div>
+    </dl>
 
-    <section class="project__video">
-      <video src="media/FigmaToBeefree.mp4" autoplay loop muted playsinline></video>
+    <section class="project__video project__video--full">
+      <img src="media/figma%20to%20rge%20studio.png" width="2000" height="1500"
+           alt="The Figma to RGE Studio plugin panel, with a button to start a new email template and a palette of prebuilt rows">
     </section>
 
     <section class="project__section">
@@ -61,6 +64,10 @@
     <section class="project__section">
       <h2>What I built with the help of Claude Code</h2>
       <p>A Figma plugin with a module palette — Row, Heading, Paragraph, Button, Image, Divider, List, Menu, Icons — that inserts real Figma nodes onto the canvas. Every node carries its Beefree-relevant properties (font, radius, padding, alignment) as plugin data, so editing mostly stays inside Figma's native property panel instead of a custom UI bolted on top. Selecting a template frame and exporting produces a valid Beefree JSON — structured rows and weighted columns that map 1:1 to what's on the canvas. For now the whole flow only works against RGE Studio's PRE (pre-production) environment.</p>
+    </section>
+
+    <section class="project__video">
+      <video src="media/FigmaToBeefree.mp4" autoplay loop muted playsinline></video>
     </section>
 
     <!--<section class="project__section">

@@ -44,9 +44,62 @@
       <p class="project__meta">Product Designer · RGE Studio (Beefree) · May 2025</p>
     </header>
 
-    <section class="project__tldr">
-      <h2>TL;DR</h2>
-      <p>The export modal was the last screen users saw before sending their email and it was confusing. Most people never discovered the native integrations that made exporting to their ESPs faster, so I redesigned the flow into a browsable, structured decision space that surfaces the best option first. After launch, connector-based exports rose 38% and HTML exports rose 15%.</p>
+    <dl class="project__facts">
+      <div><dt>My role</dt><dd>Product Designer: research, testing, UX/UI, prototyping</dd></div>
+      <div><dt>Duration</dt><dd>6 weeks, shipped May 2025</dd></div>
+      <div><dt>Team</dt><dd>Product Manager, frontend and backend engineers, QA, marketing</dd></div>
+      <div><dt>Process</dt><dd>Shape Up: pitch, betting table, fixed-time build behind a feature flag</dd></div>
+      <div><dt>Research</dt><dd>Surveys, usage data, card sorting, 2 usability tests (30 participants), 5&#8209;second tests</dd></div>
+      <div><dt>Tools</dt><dd>Figma, Ballpark, ProdPad, Pendo</dd></div>
+    </dl>
+
+    <section class="project__video project__video--full">
+      <img src="media/Export.png" width="2000" height="1500"
+           alt="Before and after: the old export modal with four stacked options, and the new one with connectors, HTML code, downloads and a preview link on one level">
+    </section>
+
+    <section class="project__section">
+      <h2>Context</h2>
+      <p>Marketers, designers and CRM teams build emails in the editor, then send them from their own platform. There were four ways to get a design out: copy the HTML, download the HTML with its images, download a PDF, or push it to a sending platform through a native connector. Connectors are the fastest, one click, and they can even update an email you already exported. Yet very few people used them.</p>
+      <p>On the entry plan, export is also where the monthly limit shows up, so the screen matters for upgrades. Keeping upgrade conversion at least where it was became a hard requirement for release.</p>
+    </section>
+
+    <section class="project__section">
+      <h2>The problem</h2>
+      <ul>
+        <li><strong>People didn&rsquo;t know what they could do.</strong> Even in our highest-paying segment, about half of users copied the HTML by hand and fewer than 1 in 10 used a connector. Users kept requesting connectors we already had.</li>
+        <li><strong>The flow made you commit before you could look around.</strong> You picked a method on the first screen and only saw what it did on the next. A wrong pick meant starting over, and interviews showed people stick with the first method that works.</li>
+        <li><strong>It explained itself too much.</strong> Instructional copy and an onboarding walkthrough most people closed right away. If a screen needs that much explaining, the screen is the problem.</li>
+        <li><strong>It couldn&rsquo;t grow.</strong> Requests for new formats, like PNG export and HTML minification, had nowhere to go without making the modal harder to use.</li>
+        <li><strong>No minifier.</strong> Gmail clips emails over 102&nbsp;KB, so content-heavy senders were pasting our code into online minifiers and back again. Competing builders already offered it, and customers had been asking since 2021.</li>
+      </ul>
+    </section>
+
+    <section class="project__section">
+      <h2>Research and testing</h2>
+      <p>The project ran as a Shape Up pitch, with product, design, engineering and marketing working as one team. I owned the research and design and ran three rounds of testing, each feeding the next.</p>
+      <ul>
+        <li><strong>Which structure works?</strong> Card sorting plus unmoderated tasks with 15 external participants, comparing the old flow, a one-level popover and a popover with a sidebar. The categories held up, and the one-level version had the least friction: the HTML download task took about 70% less time, with more people completing it.</li>
+        <li><strong>Does it work for our users?</strong> A high-fidelity prototype tested with 15 real users. Most preferred it, one-click HTML copy was the favourite detail, and the split between &ldquo;HTML&rdquo; and &ldquo;HTML + images&rdquo; was finally clear. Hiding PNG export behind &ldquo;See all&rdquo; showed me what not to bury.</li>
+        <li><strong>Does the upgrade path still work?</strong> Two 5-second tests on the redesigned plan-limit banner. Everyone noticed when the limit was reached, and everyone who said it could be removed knew it was by upgrading.</li>
+      </ul>
+    </section>
+
+    <section class="project__section">
+      <h2>Key design decisions</h2>
+      <ul>
+        <li><strong>Everything on one level.</strong> Every method is visible as soon as the modal opens, so you can look around before you commit.</li>
+        <li><strong>Integrations first, ordered for the person looking.</strong> Connected integrations, then new connectors, then the platform picked at onboarding, then the most popular ones. A more visible &ldquo;request a connector&rdquo; link tells people their tool might come next.</li>
+        <li><strong>One click to copy, details on demand.</strong> The copy icon grabs the HTML straight away; opening &ldquo;HTML code&rdquo; shows the code, its file size, the minify toggle and download.</li>
+        <li><strong>Minification built in, not bolted on.</strong> A simple on/off toggle that remembers your choice, with file size always shown and turning yellow before Gmail would clip. Kept out of connectors, since minified code is hard to edit after export.</li>
+        <li><strong>Plans create the need instead of hiding it.</strong> File size is visible on every plan and the minifier sits on higher tiers, turning a common pain point into a new reason to upgrade.</li>
+        <li><strong>What we cut.</strong> PNG export (it now has a clear home for later), tooltips and walkthroughs (if the flow needs a guide, it isn&rsquo;t done), and an opt-in rollout.</li>
+      </ul>
+    </section>
+
+    <section class="project__section">
+      <h2>The solution</h2>
+      <p>The new modal has five sections: <strong>Integrations</strong> with a personalized order and &ldquo;New&rdquo; labels; <strong>HTML</strong> with one-click copy or a detail view with size and minify; <strong>Download</strong> for HTML + images as a ZIP; <strong>PDF</strong> in desktop or mobile versions; and a <strong>Preview link</strong> with QR code, previously tucked away in a panel few people opened. The minifier cuts file size by about 20% on average without changing how the email renders. It was built in a 6-week cycle and shipped to every plan on schedule.</p>
     </section>
 
     <section class="project__video">
@@ -54,34 +107,35 @@
     </section>
 
     <section class="project__section">
-      <h2>The problem</h2>
-      <p>Export is a critical moment: it's both the final step of the workflow and a key upsell opportunity. But the modal was a flat, undifferentiated list that forced users to guess. 65% of eligible HubSpot users didn't even know native connectors existed, and switching between export methods meant restarting the whole flow. The rigid structure also made it hard to add new options, like HTML minification, without the UI becoming harder to parse.</p>
-    </section>
-
-    <section class="project__section">
-      <h2>Key insight</h2>
-      <p>Research showed users stick with the first export method they discover, it becomes a habit, and later change is rare. That made first impressions disproportionately important, and reframed the problem as one of visibility, not missing features.</p>
-    </section>
-
-    <section class="project__section">
-      <h2>The solution</h2>
-      <p>I turned the modal into a browsable decision space instead of a single forced choice: users can scan every method before committing, and switching no longer resets their progress. Connected integrations now surface first, methods are grouped by intent (Integrations, HTML, Download), and the whole framework is modular enough to absorb future formats without a redesign. A built-in HTML minification toggle shipped alongside it, cutting file size by ~20%.</p>
-    </section>
-
-    <section class="project__section">
       <h2>Impact</h2>
       <div class="project__stats">
-        <div class="project__stat"><strong>+38%</strong><span>connector-based exports</span></div>
-        <div class="project__stat"><strong>+15%</strong><span>growth in HTML exports</span></div>
-        <div class="project__stat"><strong>13→18%</strong><span>share of users adopting connectors</span></div>
-        <div class="project__stat"><strong>70%</strong><span>faster task completion time in testing</span></div>
+        <div class="project__stat"><strong>13→18%</strong><span>customers exporting via a connector</span></div>
+        <div class="project__stat"><strong>+17%</strong><span>connector exports per month</span></div>
+        <div class="project__stat"><strong>~70%</strong><span>less time on the HTML task in testing</span></div>
+        <div class="project__stat"><strong>~20%</strong><span>smaller HTML with the minifier</span></div>
       </div>
-      <p>Beyond the numbers, support tickets about export confusion and undiscovered integrations dropped, and the new modular framework means future export formats can ship without another full redesign.</p>
+      <ul>
+        <li><strong>More people found the connectors.</strong> Almost 40% more customers exported through an integration, and every connector grew, the smaller ones most.</li>
+        <li><strong>The growth held.</strong> Numbers stayed up for the four months after launch instead of spiking and dropping back: a change in habits, not a one-off try.</li>
+        <li><strong>People picked the format they needed.</strong> ZIP exports dropped while HTML exports rose, a sign the two options were finally clearly different.</li>
+        <li><strong>Upgrade path intact, plus a new one.</strong> The plan-limit banner kept working, and the minifier added a fresh reason to upgrade.</li>
+      </ul>
+      <p>These are simple before/after averages over four months on each side, not adjusted for seasonality.</p>
     </section>
 
     <section class="project__section">
       <h2>Reflections</h2>
-      <p>Users won't explore what they can't see and once they land on a method, they rarely switch, which makes the first impression the whole game. Complexity isn't solved by adding more tooltips; it's solved by simplifying the core interaction. And designing for how users already think made the new pattern feel familiar rather than foreign.</p>
+      <ul>
+        <li><strong>Habits form at the first export.</strong> If an option isn&rsquo;t visible the first time, many people will never see it.</li>
+        <li><strong>Test the structure before the details.</strong> Settling the structure in the first round let the next one focus on labels, components and edge cases.</li>
+        <li><strong>Business constraints can be design input.</strong> &ldquo;Don&rsquo;t hurt upgrade conversion&rdquo; turned into a real part of the design once I tested it on its own.</li>
+        <li><strong>Feature requests are often discoverability problems.</strong> Users asked for connectors we had and loved a preview link that already existed.</li>
+      </ul>
+    </section>
+
+    <section class="project__section">
+      <h2>Next steps</h2>
+      <p>PNG export in its new spot in the download section, pinned or default export options, bulk export, desktop and mobile PDF in one file, and suggesting minification when an email check finds it too large.</p>
     </section>
 
     <div class="project__footer-cta">
